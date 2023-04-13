@@ -7,13 +7,13 @@ export const webSocket = (httpServer: any) => {
     pingTimeout: 1000,
     upgradeTimeout: 1000,
     cors: {
-      origin: "http://127.0.0.1:5173",
+      origin: "*",
       credentials: true,
     },
   });
 
   io.on("connection", (socket: Socket) => {
-    console.log(socket);
+    console.log("ping!!!!");
     socket.on("signal", (data) => {
       socket.broadcast.emit("signal", data);
     });
