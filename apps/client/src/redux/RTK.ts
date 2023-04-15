@@ -1,18 +1,20 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-type User = {
+type Response = {
+  id: string;
   name: string;
-  email: string;
+  dealer: string;
+  players: number;
+  blinds: [number, number];
 };
 
-type Response = User;
 type Payload = {
-  email: string;
-  password: string;
+  name: string;
+  dealer: string;
 };
 
-export const AuthApi = createApi({
-  reducerPath: "AuthApi",
+export const GameApi = createApi({
+  reducerPath: "gameApi",
   baseQuery: fetchBaseQuery({
     baseUrl: "http://localhost:3001",
     credentials: "include",
@@ -20,17 +22,11 @@ export const AuthApi = createApi({
       "Content-Type": "application/json",
     },
   }),
-  tagTypes: ["Auth"],
+  tagTypes: ["game"],
   endpoints: (builder) => ({
-    me: builder.query<Response, void>({
-      query: () => ({
-        url: `/api/auth/me`,
-        method: "GET",
-      }),
-    }),
-    signIn: builder.mutation<Response, Payload>({
+    createRoom: builder.mutation<Response, Payload>({
       query: (payload) => ({
-        url: `/api/auth/signin`,
+        url: `/api/rooms`,
         method: "POST",
         body: payload,
       }),

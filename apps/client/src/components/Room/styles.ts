@@ -4,6 +4,9 @@ export const Container = styled.div`
   position: relative;
   width: 100%;
   height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 export const Button = styled.button`
@@ -28,11 +31,8 @@ export const H1 = styled.h1`
 
 export const Video = styled.video`
   position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
+  object-fit: fill;
   z-index: -1;
+  height: 100%;
+  transform: scale(-1, 1);
 `;

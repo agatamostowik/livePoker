@@ -11,11 +11,8 @@ declare global {
 
   namespace NodeJS {
     interface ProcessEnv {
-      PGPORT: number;
-      PGUSER: string;
-      PGPASSWORD: string;
-      PGHOST: string;
-      DATABASE: string;
+      SUPABASE_URL: string;
+      SUPABASE_API_KEY: string;
     }
   }
 }
@@ -23,7 +20,7 @@ declare global {
 const port = process.env.PORT || 3001;
 const app = initApp();
 
-webSocket(app);
+export const webSocketSession = webSocket(app);
 
 app.listen(port, () => {
   console.log(`http://localhost:${port}/`);

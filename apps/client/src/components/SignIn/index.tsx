@@ -1,15 +1,23 @@
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
-import { toggleIsAuthenticated } from "../../redux/slices/app";
-import { AuthApi } from "../../redux/RTK";
+import { supabase } from "../Layout";
+import { authorize } from "../../redux/slices/app";
+
+const signInWithEmail = async (email: string, password: string) => {
+  const response = await supabase.auth.signInWithPassword({
+    email: email,
+    password: password,
+  });
+
+  return response;
+};
 
 export const Signin = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("example@example.com");
+  const [email, setEmail] = useState("agata@example.com");
   const [password, setPassword] = useState("qwerty");
-  const [signIn, { isLoading }] = AuthApi.endpoints.signIn.useMutation();
-  const isAuthenticated = useAppSelector((state) => state.app.isAuthenticated);
+
   const dispatch = useAppDispatch();
 
   const handleEmail = (event: any) => {
@@ -23,26 +31,19 @@ export const Signin = () => {
   const handleSubmit = async (event: any) => {
     event.preventDefault();
 
-    try {
-      // Try logging in
-      const user = await signIn({ email, password });
+    const response = await signInWithEmail(email, password);
 
-      // If user exists in the database save the isAuthenticated flag in redux store
-      dispatch(toggleIsAuthenticated(true));
+    if (response.data.session && response.data.user) {
+      dispatch(
+        authorize({
+          session: response.data.session,
+          user: response.data.user,
+        })
+      );
 
-      // Navigate to /rooms route
-      if (user) {
-        navigate("/rooms");
-      }
-    } catch (e) {
-      // TODO: ERROR HANDLING
-      console.log(e);
+      navigate("/rooms");
     }
   };
-
-  if (isAuthenticated) {
-    return <Navigate to="/rooms" replace={true} />;
-  }
 
   return (
     <div>
@@ -51,18 +52,20 @@ export const Signin = () => {
         value={email}
         onChange={handleEmail}
         autoFocus={true}
-        disabled={isLoading}
       />
       <input
         type="password"
         value={password}
         onChange={handlePassword}
         autoComplete="current-password"
-        disabled={isLoading}
       />
-      <button type="submit" onClick={handleSubmit} disabled={isLoading}>
+      <button type="submit" onClick={handleSubmit}>
         Sign in
       </button>
     </div>
   );
 };
+
+async function signOut() {
+  const { error } = await supabase.auth.signOut();
+}

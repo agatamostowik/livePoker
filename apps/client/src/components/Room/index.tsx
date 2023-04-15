@@ -1,103 +1,166 @@
-import { useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { useMeasure } from "react-use";
 import { io, Socket } from "socket.io-client";
 import SimplePeer from "simple-peer";
 import * as Styled from "./styles";
+import { useParams } from "react-router-dom";
 
-const DealerView = () => {
-  const [peer, setPeer] = useState<SimplePeer.Instance>();
-  const [socket, setSocket] = useState<Socket>();
-  const [containerRef, { width, height }] = useMeasure<HTMLDivElement>();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [stream, setStream] = useState<MediaStream>();
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isBroadcasting, setIsBroadcasting] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
+const useMediaStream = (videoRef: RefObject<HTMLVideoElement>) => {
+  const [mediaStream, setMediaStream] = useState<MediaStream>();
+  const [isVideoPlayed, setIsVideoPlayed] = useState(false);
 
-  useEffect(() => {
-    const newSocket = io("ws://localhost:3001");
+  const getMediaStream = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: false,
+      });
 
-    setSocket(newSocket);
-
-    return () => {
-      newSocket.disconnect();
-    };
-  }, []);
-
-  const handleToogleVideo = async () => {
-    if (isPlaying) {
-      videoRef.current!.srcObject = null;
-      setIsPlaying(false);
-    } else {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: false,
-        });
-
-        videoRef.current!.srcObject = stream;
-        setStream(stream);
-        setIsPlaying(true);
-      } catch (error) {
-        console.log("Error accessing media devices", error);
-      }
+      setMediaStream(stream);
+      setIsVideoPlayed(true);
+      videoRef.current!.srcObject = stream;
+    } catch (error) {
+      console.log("error", error);
+      // TODO: Odrzucone połączenie z kamerką
     }
   };
 
   useEffect(() => {
+    getMediaStream();
+  }, []);
+
+  return { mediaStream, isVideoPlayed };
+};
+
+const useWebSocket = () => {
+  const { roomId } = useParams();
+  const [webSocket, setWebSocket] = useState<Socket>();
+  const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
+  const [isJoinedToRoom, setIsJoinedToRoom] = useState(false);
+
+  useEffect(() => {
+    const ws = io("ws://localhost:3001");
+
+    ws.on("handshake", () => {
+      setIsWebSocketConnected(true);
+
+      ws.emit("joinToRoom", { roomId: roomId });
+    });
+
+    setWebSocket(ws);
+  }, []);
+
+  useEffect(() => {
     return () => {
-      peer?.destroy();
+      webSocket?.disconnect();
     };
   });
 
-  const handleToggleStream = async () => {
-    if (isBroadcasting) {
-      setIsBroadcasting(false);
-    } else {
-      const peerConnection = new SimplePeer({
-        initiator: true, // inicjujemy połączenie oraz oznacza, że to nasz peer jest inicjatorem
-        stream: stream, // przekazujemy nasz strumień wideo
-        trickle: false, // nie ustawiamy kropli (progresywne ładowanie), aby uniknąć opóźnień / Wymusza zbatchowanie ofert i odpowiedzi, co zmniejsza obciążenie sieci
-      });
+  return { webSocket, isWebSocketConnected };
+};
 
-      peerConnection.on("connect", () => {
-        console.log("Connected"); // Jeśli się połączyliśmy, to logujemy informację
-      });
+const useWebRTC = (mediaStream?: MediaStream) => {
+  const [webRTC, setPeer] = useState<SimplePeer.Instance>();
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
 
-      // nasłuchujemy sygnały peer-to-peer
-      peerConnection.on("signal", (data) => {
-        // wysyłamy sygnał do drugiego klienta poprzez WebSocket
-        socket?.emit("signal", data);
-      });
-
-      socket?.on("signal", (signal) => {
-        peerConnection.signal(signal);
-      });
-
-      setPeer(peerConnection);
-      setIsBroadcasting(true);
+  useEffect(() => {
+    if (!webRTC) {
+      return;
     }
-  };
 
-  const handleToogleConnectionToServer = () => {
-    if (isConnected) {
-      if (socket) {
-        socket.disconnect();
-        setIsConnected(false);
-      }
-    } else {
-      if (socket) {
-        socket.connect();
-        setIsConnected(true);
-      }
-    }
-  };
+    const simplePeer = new SimplePeer({
+      initiator: true, // inicjujemy połączenie oraz oznacza, że to nasz peer jest inicjatorem
+      stream: mediaStream, // przekazujemy nasz strumień wideo
+      trickle: false, // nie ustawiamy kropli (progresywne ładowanie), aby uniknąć opóźnień / Wymusza zbatchowanie ofert i odpowiedzi, co zmniejsza obciążenie sieci
+    });
+
+    setPeer(simplePeer);
+  }, [mediaStream, webRTC]);
+
+  useEffect(() => {
+    return () => {
+      webRTC?.destroy();
+    };
+  });
+
+  return { webRTC, isBroadcasting };
+};
+
+const DealerView = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const { webSocket, isWebSocketConnected, isJoinedToRoom } = useWebSocket();
+  const { mediaStream, isVideoPlayed } = useMediaStream(videoRef);
+  const { webRTC, isBroadcasting } = useWebRTC(mediaStream);
+
+  // const [containerRef, { width, height }] = useMeasure<HTMLDivElement>();
+
+  // const handleToogleVideo = async () => {
+  //   if (isPlaying) {
+  //     videoRef.current!.srcObject = null;
+  //     setIsPlaying(false);
+  //   } else {
+  //     try {
+  //       const stream = await navigator.mediaDevices.getUserMedia({
+  //         video: true,
+  //         audio: false,
+  //       });
+
+  //       videoRef.current!.srcObject = stream;
+
+  //       setIsPlaying(true);
+  //     } catch (error) {
+  //       console.log("Error accessing media devices", error);
+  //     }
+  //   }
+  // };
+
+  // const handleToggleStream = async () => {
+  //   if (isBroadcasting) {
+  //     setIsBroadcasting(false);
+  //   } else {
+  //     const peerConnection = new SimplePeer({
+  //       initiator: true, // inicjujemy połączenie oraz oznacza, że to nasz peer jest inicjatorem
+  //       stream: stream, // przekazujemy nasz strumień wideo
+  //       trickle: false, // nie ustawiamy kropli (progresywne ładowanie), aby uniknąć opóźnień / Wymusza zbatchowanie ofert i odpowiedzi, co zmniejsza obciążenie sieci
+  //     });
+
+  //     peerConnection.on("connect", () => {
+  //       console.log("Connected"); // Jeśli się połączyliśmy, to logujemy informację
+  //     });
+
+  //     // nasłuchujemy sygnały peer-to-peer
+  //     peerConnection.on("signal", (data) => {
+  //       // wysyłamy sygnał do drugiego klienta poprzez WebSocket
+  //       socket?.emit("signal", data);
+  //     });
+
+  //     socket?.on("signal", (signal) => {
+  //       peerConnection.signal(signal);
+  //     });
+
+  //     setIsBroadcasting(true);
+  //   }
+  // };
+
+  // const handleToogleConnectionToServer = () => {
+  //   if (isConnected) {
+  //     if (socket) {
+  //       socket.disconnect();
+  //       setIsConnected(false);
+  //     }
+  //   } else {
+  //     if (socket) {
+  //       socket.connect();
+  //       setIsConnected(true);
+  //     }
+  //   }
+  // };
 
   return (
-    <Styled.Container ref={containerRef}>
+    <Styled.Container>
       <Styled.Floating>
         <h1>Dealer view</h1>
-        <div>
+        {/* <div>
           <button onClick={handleToogleConnectionToServer}>
             {isConnected
               ? "Disconnect from WebSocket server"
@@ -113,13 +176,13 @@ const DealerView = () => {
           <button onClick={handleToggleStream}>
             {isBroadcasting ? "Stop broadcasting" : "Start broadcasting"}
           </button>
-        </div>
+        </div> */}
 
-        <div>WebSocket connection: {isConnected.toString()}</div>
-        <div>Video: {isPlaying.toString()}</div>
+        <div>WebSocket connection: {isWebSocketConnected.toString()}</div>
+        <div>Video: {isVideoPlayed.toString()}</div>
         <div>Broadcasting: {isBroadcasting.toString()}</div>
       </Styled.Floating>
-      <Styled.Video ref={videoRef} autoPlay width={width} height={height} />
+      <Styled.Video ref={videoRef} autoPlay />
     </Styled.Container>
   );
 };

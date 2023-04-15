@@ -7,15 +7,23 @@ export const webSocket = (httpServer: any) => {
     pingTimeout: 1000,
     upgradeTimeout: 1000,
     cors: {
-      origin: "*",
+      origin: "http://127.0.0.1:5173",
       credentials: true,
     },
   });
 
-  io.on("connection", (socket: Socket) => {
-    console.log("ping!!!!");
+  const webSocketSession = io.on("connection", (socket: Socket) => {
+    socket.emit("handshake");
+
+    // socket.on("joinRoom", () => {
+    //   // socket.join(room.name);
+    //   // socket.emit("joinedToRoom");
+    // });
+
     socket.on("signal", (data) => {
       socket.broadcast.emit("signal", data);
     });
   });
+
+  return webSocketSession;
 };

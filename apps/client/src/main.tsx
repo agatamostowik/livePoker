@@ -12,9 +12,9 @@ import { Layout } from "./components/Layout";
 import { store } from "./redux/store";
 import { Rooms } from "./components/Rooms";
 import { Room } from "./components/Room";
-import "sanitize.css";
 import { GlobalStyle } from "./GlobalStyle";
 import { Signin } from "./components/SignIn";
+import "sanitize.css";
 
 const Routers = () => {
   return (
@@ -22,11 +22,11 @@ const Routers = () => {
       router={createBrowserRouter(
         createRoutesFromElements(
           <Route path="/" element={<Layout />}>
-            <Route index element={<Navigate replace to={`/rooms`} />} />
+            <Route index element={<Navigate replace to={`rooms`} />} />
             <Route path="signin" element={<Signin />} />
             <Route path="rooms">
               <Route index element={<Rooms />} />
-              <Route path=":id" element={<Room />} />
+              <Route path=":roomId" element={<Room />} />
             </Route>
           </Route>
         )
@@ -37,12 +37,12 @@ const Routers = () => {
 
 const rootElement = document.getElementById("root")!;
 createRoot(rootElement).render(
-  <StrictMode>
-    <Provider store={store}>
-      <>
-        <Routers />
-        <GlobalStyle />
-      </>
-    </Provider>
-  </StrictMode>
+  <Provider store={store}>
+    <>
+      <Routers />
+      <GlobalStyle />
+    </>
+  </Provider>
+  // <StrictMode>
+  // </StrictMode>
 );

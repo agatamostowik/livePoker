@@ -1,8 +1,7 @@
 {
   "name": "hazard",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "private": true,
-  "author": "Agata Mostowik",
   "workspaces": [
     "apps/*"
   ],
