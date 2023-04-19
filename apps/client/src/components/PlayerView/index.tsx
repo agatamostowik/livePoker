@@ -46,21 +46,43 @@ const Game = () => {
   const [startGame] = GameApi.endpoints.startGame.useMutation();
   const playerId = useAppSelector((state) => state.app.user?.id);
 
-  const handleStartGame = async () => {
-    console.log("ping");
-    const response = await startGame({
+  const game = useAppSelector((state) => state.app.game);
+  const round = useAppSelector((state) => state.app.round);
+
+  const handleStartGame = () => {
+    webSocketClient.emit("startGame", {
       roomId: roomId!,
       playerId: playerId!,
       dealerId: data?.dealer_id!,
     });
-    console.log("response:", response);
   };
+
   return (
     <Styled.Game>
       <Styled.Board>
-        <Styled.JoinGameButton onClick={handleStartGame}>
-          Join Game
-        </Styled.JoinGameButton>
+        {!game && (
+          <Styled.JoinGameButton onClick={handleStartGame}>
+            Join Game
+          </Styled.JoinGameButton>
+        )}
+        {round && (
+          <Styled.ChipsContainer>
+            <p>UNDO</p>
+            <Styled.Chip>UNDO</Styled.Chip>
+            <Styled.Chip>0.5</Styled.Chip>
+            <Styled.Chip>1</Styled.Chip>
+            <Styled.Chip>5</Styled.Chip>
+            <Styled.Chip>25</Styled.Chip>
+            <Styled.Chip>100</Styled.Chip>
+            <Styled.Chip>500</Styled.Chip>
+            <Styled.Chip>x2</Styled.Chip>
+            <p>DOUBLE</p>
+          </Styled.ChipsContainer>
+        )}
+        <Styled.Buttons>
+          <Styled.AAButton>AA</Styled.AAButton>
+          <Styled.AnteButton>Ante</Styled.AnteButton>
+        </Styled.Buttons>
       </Styled.Board>
     </Styled.Game>
   );

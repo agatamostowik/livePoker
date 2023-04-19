@@ -9,7 +9,7 @@ type Response = {
   blinds: [number, number];
 };
 
-type CreateRoomPayload = Pick<Room, "id" | "name" | "dealer_id">;
+type CreateRoomPayload = Pick<Room, "name" | "dealer_id">;
 
 export type Room = {
   id: string;

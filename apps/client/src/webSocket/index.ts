@@ -1,5 +1,11 @@
 import { io } from "socket.io-client";
-import { setIsWebSocketConnected } from "../redux/slices/app";
+import {
+  Game,
+  Round,
+  setGame,
+  setRound,
+  setIsWebSocketConnected,
+} from "../redux/slices/app";
 import { store } from "../redux/store";
 import { GameApi } from "../redux/RTK";
 
@@ -12,4 +18,12 @@ webSocketClient.on("HANDSHAKE", () => {
 webSocketClient.on("ROOM_CREATED", async () => {
   const result = store.dispatch(GameApi.endpoints.getRooms.initiate());
   await result.refetch();
+});
+
+webSocketClient.on("gameStarted", (data: Game) => {
+  store.dispatch(setGame(data));
+});
+
+webSocketClient.on("bettingStarted", (data: Round) => {
+  store.dispatch(setRound(data));
 });

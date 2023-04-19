@@ -24,6 +24,42 @@ export const webSocket = (httpServer: any) => {
     socket.on("ping", (signal: string) => {
       socket.broadcast.emit("pong", signal);
     });
+
+    socket.on("startGame", async (params) => {
+      const { data, error } = await supabase
+        .from("games")
+        .insert([
+          {
+            room_id: params.roomId,
+            player_id: params.playerId,
+            dealer_id: params.dealerId,
+            game_over: false,
+          },
+        ])
+        .select("*");
+
+      if (data) {
+        socket.emit("gameStarted", data[0]);
+        socket.broadcast.emit("gameStarted", data[0]);
+      }
+    });
+    socket.on("startBetting", async (params) => {
+      const { data, error } = await supabase
+        .from("rounds")
+        .insert([
+          {
+            room_id: params.roomId,
+            player_id: params.playerId,
+            game_id: params.gameId,
+          },
+        ])
+        .select("*");
+
+      if (data) {
+        socket.emit("bettingStarted", data[0]);
+        socket.broadcast.emit("bettingStarted", data[0]);
+      }
+    });
   });
 
   return io;
