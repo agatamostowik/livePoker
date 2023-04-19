@@ -1,58 +1,88 @@
-import { useEffect, useRef, useState } from "react";
-import { useMeasure } from "react-use";
-import { io, Socket } from "socket.io-client";
-import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import { RefObject, useEffect, useRef, useState } from "react";
+import SimplePeer from "simple-peer";
+import _ from "lodash";
 import * as Styled from "./styles";
+import { GameApi, Room } from "../../redux/RTK";
+import { useParams } from "react-router-dom";
+import { webSocketClient } from "../../webSocket";
+import { useAppSelector } from "../../redux/store";
 
-export const PlayerView = () => {
-  const [containerRef, { width, height }] = useMeasure<HTMLDivElement>();
-  const [socket, setSocket] =
-    useState<Socket<DefaultEventsMap, DefaultEventsMap>>();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoURL, setVideoURL] = useState<string>("");
-
-  const [isConnected, setIsConnected] = useState(false);
-
-  const onStream = async (data: any) => {
-    const blob = new Blob([data], { type: "video/mp4" });
-    const videoURL = URL.createObjectURL(blob);
-
-    setVideoURL(videoURL);
-  };
+const useWebRTC = (videoRef: RefObject<HTMLVideoElement>, room?: Room) => {
+  const [webRTC, setPeer] = useState<SimplePeer.Instance>();
 
   useEffect(() => {
-    const newSocket = io("ws://localhost:3001/video", {
-      autoConnect: false,
+    if (webRTC || !room) {
+      return;
+    }
+
+    const receiver = new SimplePeer({
+      initiator: false,
     });
 
-    newSocket.on("stream", onStream);
-    setSocket(newSocket);
+    receiver.signal(JSON.parse(room.stream_address));
 
-    return () => {
-      newSocket.off("stream", onStream);
-    };
-  }, []);
+    webSocketClient.on("pong", (streamerAddress) => {
+      receiver.signal(JSON.parse(streamerAddress));
+    });
 
-  const connectToServer = () => {
-    if (socket) {
-      socket.connect();
-      setIsConnected(true);
-    }
+    receiver.on("signal", (signal) => {
+      webSocketClient.emit("ping", JSON.stringify(signal));
+    });
+
+    // only for receiver
+    receiver.on("stream", (stream) => {
+      videoRef.current!.srcObject = stream;
+    });
+
+    setPeer(receiver);
+  }, [webRTC, room]);
+
+  return { webRTC };
+};
+
+const Game = () => {
+  const { roomId } = useParams();
+  const { data, isLoading } = GameApi.endpoints.getRoomById.useQuery(roomId!);
+  const [startGame] = GameApi.endpoints.startGame.useMutation();
+  const playerId = useAppSelector((state) => state.app.user?.id);
+
+  const handleStartGame = async () => {
+    console.log("ping");
+    const response = await startGame({
+      roomId: roomId!,
+      playerId: playerId!,
+      dealerId: data?.dealer_id!,
+    });
+    console.log("response:", response);
   };
+  return (
+    <Styled.Game>
+      <Styled.Board>
+        <Styled.JoinGameButton onClick={handleStartGame}>
+          Join Game
+        </Styled.JoinGameButton>
+      </Styled.Board>
+    </Styled.Game>
+  );
+};
+
+export const PlayerView = () => {
+  const { roomId } = useParams();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const { data, isLoading } = GameApi.endpoints.getRoomById.useQuery(roomId!);
+  const { webRTC } = useWebRTC(videoRef, data);
+
+  if (isLoading) {
+    return <div>Loading</div>;
+  }
 
   return (
-    <Styled.Container ref={containerRef}>
+    <Styled.Container>
       <Styled.Floating>
-        <h1>Player View</h1>
-        <button onClick={connectToServer} disabled={isConnected}>
-          Connect to server
-        </button>
-        <div>Connected to the server: {isConnected.toString()}</div>
+        <h1>Player view</h1>
       </Styled.Floating>
-
-      <Styled.Video ref={videoRef} autoPlay width={width} height={height}>
-        <source src={videoURL} type="video/mp4" />
-      </Styled.Video>
+      <Styled.Video ref={videoRef} autoPlay />
+      <Game />
     </Styled.Container>
   );
 };

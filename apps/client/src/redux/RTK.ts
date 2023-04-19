@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import SimplePeer from "simple-peer";
 
 type Response = {
   id: string;
@@ -8,9 +9,46 @@ type Response = {
   blinds: [number, number];
 };
 
-type Payload = {
+type CreateRoomPayload = Pick<Room, "id" | "name" | "dealer_id">;
+
+export type Room = {
+  id: string;
+  created_at: string;
   name: string;
+  dealer_id: string;
+  stream_address: string;
+};
+
+type UpdateRoomPayload = {
+  roomId: string;
+  name?: string;
+  dealer?: string;
+  streamAddress?: SimplePeer.SignalData;
+};
+
+type Rooms = Room[];
+
+type Account = {
+  id: string;
+  user_id: string;
+  role: "dealer" | "player";
+  balance: number;
+  name: string;
+};
+
+type Game = {
+  id: string;
+  created_at: string;
+  room_id: string;
+  player_id: string;
   dealer: string;
+  game_over: boolean;
+};
+
+type CreateGamePayload = {
+  roomId: string;
+  playerId: string;
+  dealerId: string;
 };
 
 export const GameApi = createApi({
@@ -24,12 +62,53 @@ export const GameApi = createApi({
   }),
   tagTypes: ["game"],
   endpoints: (builder) => ({
-    createRoom: builder.mutation<Response, Payload>({
+    getRoomById: builder.query<Room, string>({
+      query: (roomId) => {
+        return { url: `/api/rooms/${roomId}`, method: "GET" };
+      },
+    }),
+    getRooms: builder.query<Rooms, void>({
+      query: () => ({
+        url: "/api/rooms",
+        method: "GET",
+      }),
+    }),
+    createRoom: builder.mutation<Response, CreateRoomPayload>({
       query: (payload) => ({
-        url: `/api/rooms`,
+        url: "/api/rooms",
         method: "POST",
         body: payload,
       }),
     }),
+    getUserAccount: builder.query<Account, string>({
+      query: (userId) => ({
+        url: `/api/auth/me?userId=${userId}`,
+        method: "GET",
+      }),
+    }),
+    updateRoom: builder.mutation<Room, UpdateRoomPayload>({
+      query: (payload) => {
+        const { roomId, ...body } = payload;
+
+        return {
+          url: `/api/rooms/${roomId}`,
+          method: "PUT",
+          body: body,
+        };
+      },
+    }),
+    startGame: builder.mutation<Game, CreateGamePayload>({
+      query: (payload) => {
+        const { roomId, ...body } = payload;
+
+        return {
+          url: `/api/rooms/${roomId}/start-game`,
+          method: "POST",
+          body: body,
+        };
+      },
+    }),
   }),
 });
+
+export const { getRooms } = GameApi.endpoints;

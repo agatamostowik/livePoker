@@ -1,12 +1,25 @@
 import { Request, Response } from "express";
-import _ from "lodash";
 import { supabase } from "../db";
 
-export const createRoomController = async (req: Request, res: Response) => {
+type Room = {
+  id: string;
+  created_at: string;
+  name: string;
+  dealer: string;
+};
+
+export const gameController = async (req: Request, res: Response) => {
   try {
     const { data, error } = await supabase
-      .from("rooms")
-      .insert([{ name: req.body.name, dealer_id: req.body.dealer_id }])
+      .from("games")
+      .insert([
+        {
+          room_id: req.params.roomId,
+          player_id: req.body.playerId,
+          dealer_id: req.body.dealerId,
+          game_over: false,
+        },
+      ])
       .select("*");
 
     if (error) {

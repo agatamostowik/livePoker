@@ -1,43 +1,30 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Session, User } from "@supabase/supabase-js";
 import { Socket } from "socket.io-client";
+import { webSocketClient } from "../../webSocket";
 
 export type State = {
   user: User | null;
-  session: Session | null;
-  webSocket: Socket | null;
+  webSocketClient: Socket;
+  isWebSocketConnected: boolean;
 };
 
 const initialState: State = {
   user: null,
-  session: null,
-  webSocket: null,
+  webSocketClient: webSocketClient,
+  isWebSocketConnected: false,
 };
 
 const appSlice = createSlice({
   name: "app",
   initialState,
   reducers: {
-    authorize: (
-      state,
-      action: PayloadAction<{ user: User; session: Session }>
-    ) => {
-      return {
-        ...state,
-        user: action.payload.user,
-        session: action.payload.session,
-      };
-    },
     setUser: (state, action: PayloadAction<any | null>) => {
       return { ...state, user: action.payload };
     },
 
-    setSession: (state, action: PayloadAction<Session | null>) => {
-      return { ...state, session: action.payload };
-    },
-
-    setWebSocket: (state, action: PayloadAction<Socket | null>) => {
-      return { ...state, webSocket: action.payload };
+    setIsWebSocketConnected: (state, action: PayloadAction<boolean>) => {
+      return { ...state, isWebSocketConnected: action.payload };
     },
 
     reset: () => {
@@ -47,4 +34,4 @@ const appSlice = createSlice({
 });
 
 export const appReducer = appSlice.reducer;
-export const { authorize, setUser, setSession, reset } = appSlice.actions;
+export const { setUser, setIsWebSocketConnected, reset } = appSlice.actions;

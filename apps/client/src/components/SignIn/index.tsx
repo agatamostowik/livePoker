@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { ChangeEvent, MouseEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../../redux/store";
-import { supabase } from "../Layout";
-import { authorize } from "../../redux/slices/app";
+import { useAppDispatch } from "../../redux/store";
+import { setUser } from "../../redux/slices/app";
+import { supabase } from "../../db";
 
 const signInWithEmail = async (email: string, password: string) => {
   const response = await supabase.auth.signInWithPassword({
@@ -13,35 +13,43 @@ const signInWithEmail = async (email: string, password: string) => {
   return response;
 };
 
+const signOut = async () => {
+  const { error } = await supabase.auth.signOut();
+
+  return error;
+};
+
 export const Signin = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("agata@example.com");
-  const [password, setPassword] = useState("qwerty");
-
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const dispatch = useAppDispatch();
 
-  const handleEmail = (event: any) => {
+  const handleEmail = (event: ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
   };
 
-  const handlePassword = (event: any) => {
+  const handlePassword = (event: ChangeEvent<HTMLInputElement>) => {
     setPassword(event.target.value);
   };
 
-  const handleSubmit = async (event: any) => {
+  const handleSubmit = async (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
 
-    const response = await signInWithEmail(email, password);
+    try {
+      const { data, error } = await signInWithEmail(email, password);
 
-    if (response.data.session && response.data.user) {
-      dispatch(
-        authorize({
-          session: response.data.session,
-          user: response.data.user,
-        })
-      );
+      if (error) {
+        //  TODO: handle error
+      }
 
-      navigate("/rooms");
+      if (data.user) {
+        dispatch(setUser(data.user));
+
+        navigate("/rooms");
+      }
+    } catch (error) {
+      // TODO: handle error
     }
   };
 
@@ -65,7 +73,3 @@ export const Signin = () => {
     </div>
   );
 };
-
-async function signOut() {
-  const { error } = await supabase.auth.signOut();
-}

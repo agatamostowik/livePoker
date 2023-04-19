@@ -12,8 +12,11 @@ export const store = configureStore({
     [GameApi.reducerPath]: GameApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(GameApi.middleware),
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }).concat(GameApi.middleware),
 });
+
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 

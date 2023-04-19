@@ -1,95 +1,87 @@
-import { useEffect, useRef, useState } from "react";
-import { useMeasure } from "react-use";
-import { io, Socket } from "socket.io-client";
-import { useInterval } from "react-use";
-import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import { RefObject, useEffect, useRef, useState } from "react";
+import SimplePeer from "simple-peer";
+import _ from "lodash";
 import * as Styled from "./styles";
+import { GameApi } from "../../redux/RTK";
+import { useParams } from "react-router-dom";
+import { webSocketClient } from "../../webSocket";
 
-export const DealerView = () => {
-  const [socket, setSocket] =
-    useState<Socket<DefaultEventsMap, DefaultEventsMap>>();
-  const videoRef = useRef<any>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [containerRef, { width, height }] = useMeasure<HTMLDivElement>();
-  const [frames] = useState(30);
-  const [isBroadcasting, setIsBroadcasting] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
+const useMediaStream = (videoRef: RefObject<HTMLVideoElement>) => {
+  const [mediaStream, setMediaStream] = useState<MediaStream>();
 
-  useInterval(
-    () => {
-      const context = canvasRef.current!.getContext("2d");
-      context!.drawImage(videoRef.current, 0, 0, width, height);
-
-      canvasRef.current!.toBlob(async (blob) => {
-        if (socket) {
-          setIsBroadcasting(true);
-          socket.emit("stream", blob);
-        }
-      }, "video/mp4");
-    },
-    isPlaying ? 1000 / frames : null
-  );
-
-  useEffect(() => {
-    const newSocket = io("ws://localhost:3001/video", {
-      autoConnect: false,
-    });
-
-    setSocket(newSocket);
-  }, []);
-
-  const startVideo = () => {
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: false })
-      .then((stream) => {
-        videoRef.current!.srcObject = stream;
-        videoRef.current!.play();
-        setIsPlaying(true);
-      })
-      .catch((err) => {
-        console.error("error:", err);
+  const getMediaStream = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: false,
       });
-  };
 
-  const stopVideo = () => {
-    videoRef.current!.pause();
-    videoRef.current!.srcObject = null;
-    setIsPlaying(false);
-    setIsBroadcasting(false);
-  };
-
-  const connectToServer = () => {
-    if (socket) {
-      socket.connect();
-      setIsConnected(true);
+      setMediaStream(stream);
+      videoRef.current!.srcObject = stream;
+    } catch (error) {
+      console.log("odrzuconooo połączenieeeee!!", error);
+      // TODO: Odrzucone połączenie z kamerką
     }
   };
 
+  useEffect(() => {
+    getMediaStream();
+  }, []);
+
+  return { mediaStream };
+};
+
+const useWebRTC = (mediaStream?: MediaStream) => {
+  const { roomId } = useParams();
+  const [webRTC, setPeer] = useState<SimplePeer.Instance>();
+  const [updateRoom] = GameApi.endpoints.updateRoom.useMutation();
+
+  useEffect(() => {
+    if (webRTC || !mediaStream) {
+      return;
+    }
+
+    const streamer = new SimplePeer({
+      initiator: true, // inicjujemy połączenie oraz oznacza, że to nasz peer jest inicjatorem
+      stream: mediaStream, // przekazujemy nasz strumień wideo
+      trickle: false, // nie ustawiamy kropli (progresywne ładowanie), aby uniknąć opóźnień / Wymusza zbatchowanie ofert i odpowiedzi, co zmniejsza obciążenie sieci
+    });
+
+    webSocketClient.on("pong", (receiverAddress) => {
+      streamer.signal(JSON.parse(receiverAddress));
+    });
+
+    streamer.on("signal", async (signal) => {
+      await updateRoom({
+        roomId: roomId!,
+        streamAddress: signal,
+      });
+    });
+
+    setPeer(streamer);
+  }, [mediaStream, webRTC, , roomId]);
+
+  return { webRTC };
+};
+
+export const DealerView = () => {
+  const { roomId } = useParams();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const { mediaStream } = useMediaStream(videoRef);
+  const { webRTC } = useWebRTC(mediaStream);
+  const { data, isLoading } = GameApi.endpoints.getRoomById.useQuery(roomId!);
+
+  if (isLoading) {
+    return <div>Loading</div>;
+  }
+
   return (
-    <Styled.Container ref={containerRef}>
+    <Styled.Container>
       <Styled.Floating>
         <h1>Dealer view</h1>
-
-        <button onClick={connectToServer} disabled={isConnected}>
-          Connect to server
-        </button>
-
-        <div>
-          <button onClick={startVideo} disabled={isPlaying}>
-            Start Video
-          </button>
-          <button onClick={stopVideo} disabled={!isPlaying}>
-            Stop Video
-          </button>
-        </div>
-        <div>Video Capturing: {isPlaying.toString()}</div>
-        <div>Connected to the server: {isConnected.toString()}</div>
-        <div>Broadcasting: {isBroadcasting.toString()}</div>
       </Styled.Floating>
 
-      <Styled.Video ref={videoRef} hidden />
-      <canvas ref={canvasRef} width={width} height={height} />
+      <Styled.Video ref={videoRef} autoPlay />
     </Styled.Container>
   );
 };

@@ -1,97 +1,67 @@
 import { useNavigate } from "react-router-dom";
-import { GameApi } from "../../redux/RTK";
-import { useState } from "react";
-import { Modal } from "../Modal";
+import _ from "lodash";
 import { useAppSelector } from "../../redux/store";
-
-const CreateRoomButton = () => {
-  const navigate = useNavigate();
-  const [createRoom] = GameApi.endpoints.createRoom.useMutation();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [name] = useState("Agata's Room");
-  const [dealer] = useState("Agata Mostowik");
-
-  const handleCreateRoom = async () => {
-    try {
-      const room = await createRoom({
-        name: name,
-        dealer: dealer,
-      }).unwrap();
-
-      if (room) {
-        navigate(`/rooms/${room.id}`);
-      }
-    } catch (error) {
-      // TODO: handle error when room is created
-    }
-  };
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleNameChange = () => {};
-
-  return (
-    <>
-      <button onClick={handleOpenModal}>Create room</button>
-      {isModalOpen && (
-        <Modal onClose={handleCloseModal}>
-          <div>
-            <div>
-              <label>Game name:</label>
-              <input type="text" value={name} onChange={handleNameChange} />
-            </div>
-
-            <button onClick={handleCloseModal}>Cancel</button>
-            <button onClick={handleCreateRoom}>Create Room</button>
-          </div>
-        </Modal>
-      )}
-    </>
-  );
-};
+import { CreateRoomModal } from "../CreateRoomModal";
+import { GameApi } from "../../redux/RTK";
 
 export const Rooms = () => {
   const navigate = useNavigate();
   const user = useAppSelector((state) => state.app.user);
+  const { data, isSuccess } = GameApi.endpoints.getRooms.useQuery();
+
+  if (!isSuccess) {
+    return <div>LOADING ROOMS</div>;
+  }
 
   const handleSignIn = () => {
     navigate("/signin");
   };
 
+  const handleJoinRoom = async (roomId: string) => {
+    navigate(`/rooms/${roomId}`);
+  };
+
   return (
     <div>
-      {user && <div>{user.email}</div>}
-      <table>
-        <thead>
-          <tr>
-            <th>Game name</th>
-            <th>Dealer</th>
-            <th>Bids</th>
-            <th>Players</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Poker Game!</td>
-            <td>Agata Mostowik</td>
-            <td>10$/20$</td>
-            <td>2 / 6</td>
-            <td>
-              <button>Join</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      {_.isEmpty(data) ? (
+        <div>Poczekaj na stworzenie pokoju przez Dealera</div>
+      ) : (
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>Game name</th>
+                <th>Dealer</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((room, index) => {
+                return (
+                  <tr key={index}>
+                    <td>{room.name}</td>
+                    <td>{room.dealer_id}</td>
+                    <td>
+                      <button
+                        onClick={() => {
+                          handleJoinRoom(room.id);
+                        }}
+                      >
+                        Join
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-      <button onClick={handleSignIn}>Login</button>
-      <CreateRoomButton />
+      <button disabled={!_.isNull(user)} onClick={handleSignIn}>
+        Login
+      </button>
+      <CreateRoomModal />
     </div>
   );
 };

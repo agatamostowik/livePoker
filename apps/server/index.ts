@@ -18,9 +18,8 @@ declare global {
 }
 
 const port = process.env.PORT || 3001;
-const app = initApp();
-
-export const webSocketSession = webSocket(app);
+export const app = initApp();
+export const io = webSocket(app);
 
 app.listen(port, () => {
   console.log(`http://localhost:${port}/`);

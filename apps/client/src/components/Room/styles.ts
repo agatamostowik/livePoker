@@ -30,9 +30,18 @@ export const H1 = styled.h1`
 `;
 
 export const Video = styled.video`
-  position: fixed;
+  /* position: fixed;
   object-fit: fill;
   z-index: -1;
   height: 100%;
   transform: scale(-1, 1);
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0; */
+  aspect-ratio: 16 / 9;
+  z-index: -1;
+  height: 100%;
+  transform: scale(-1, 1);
+  width: 100%;
 `;
