@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Session, User } from "@supabase/supabase-js";
+import { User } from "@supabase/supabase-js";
 import { Socket } from "socket.io-client";
 import { webSocketClient } from "../../webSocket";
-import { E } from "styled-icons/fa-solid";
+import SimplePeer from "simple-peer";
 
 export type Game = {
   id: string;
@@ -27,17 +27,21 @@ export type Round = {
 export type State = {
   user: User | null;
   webSocketClient: Socket;
+  mediaStream: MediaStream | null;
   isWebSocketConnected: boolean;
   game: Game | null;
   round: Round | null;
+  videoIsPlaying: boolean;
 };
 
 const initialState: State = {
   user: null,
   webSocketClient: webSocketClient,
+  mediaStream: null,
   isWebSocketConnected: false,
   game: null,
   round: null,
+  videoIsPlaying: false,
 };
 
 const appSlice = createSlice({
@@ -59,6 +63,14 @@ const appSlice = createSlice({
       return { ...state, round: action.payload };
     },
 
+    setVideoIsPlaying: (state, action: PayloadAction<boolean>) => {
+      return { ...state, videoIsPlaying: action.payload };
+    },
+
+    setMediaStream: (state, action: PayloadAction<MediaStream>) => {
+      return { ...state, mediaStream: action.payload };
+    },
+
     reset: () => {
       return initialState;
     },
@@ -66,5 +78,12 @@ const appSlice = createSlice({
 });
 
 export const appReducer = appSlice.reducer;
-export const { setRound, setGame, setUser, setIsWebSocketConnected, reset } =
-  appSlice.actions;
+export const {
+  setMediaStream,
+  setVideoIsPlaying,
+  setRound,
+  setGame,
+  setUser,
+  setIsWebSocketConnected,
+  reset,
+} = appSlice.actions;

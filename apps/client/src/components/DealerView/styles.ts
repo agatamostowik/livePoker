@@ -25,12 +25,15 @@ export const H1 = styled.h1`
 
 export const Game = styled.div`
   position: absolute;
-  z-index: 2;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
 `;
 
 export const Video = styled.video`
   width: 100%;
-  z-index: 0;
   max-height: 100vh;
 `;
 export const StartBetting = styled.button`
@@ -43,7 +46,6 @@ export const Board = styled.div`
   width: 100%;
   height: 100%;
   position: relative;
-
   display: flex;
   justify-content: center;
   align-items: flex-end;
@@ -55,6 +57,7 @@ export const Aside = styled.div`
   width: 300px;
   position: absolute;
   left: 0;
+  z-index: 1;
 `;
 
 export const Buttons = styled.div``;
@@ -72,4 +75,10 @@ export const AnteButton = styled.div`
   align-items: center;
   color: #ffffff;
   font-size: 30px;
+`;
+
+export const Test = styled.div`
+  width: 100%;
+  max-height: 100vh;
+  position: relative;
 `;

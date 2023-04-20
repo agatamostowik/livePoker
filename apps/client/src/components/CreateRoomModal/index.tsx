@@ -17,22 +17,12 @@ export const CreateRoomModal = () => {
   });
 
   const handleCreateRoom = async () => {
-    if (user?.id) {
-      try {
-        const room = await createRoom({
-          name: name,
-          dealer_id: user.id,
-        }).unwrap();
+    webSocketClient.emit("createRoom", {
+      name: name,
+      dealer_id: user?.id,
+    });
 
-        webSocketClient.emit("CREATE_ROOM", room.id);
-
-        if (room) {
-          navigate(`/rooms/${room.id}`);
-        }
-      } catch (error) {
-        // TODO: handle error when room is created
-      }
-    }
+    setIsModalOpen(false);
   };
 
   const handleOpenModal = () => {

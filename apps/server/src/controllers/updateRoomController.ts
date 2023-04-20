@@ -20,6 +20,7 @@ export const updateRoomController = async (req: Request, res: Response) => {
     }
 
     if (data) {
+      console.log("Update Room (SUCCESS):", data[0]);
       res.json(data[0]);
     }
   } catch (error) {
