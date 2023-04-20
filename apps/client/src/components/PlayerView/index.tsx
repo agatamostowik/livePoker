@@ -8,9 +8,20 @@ import { useAppDispatch, useAppSelector } from "../../redux/store";
 import * as Styled from "./styles";
 import { setMediaStream, setVideoIsPlaying } from "../../redux/slices/app";
 
+import { Peer } from "peerjs";
+
 const createPeer = () => {
   return new SimplePeer({
     initiator: false,
+    config: {
+      iceServers: [
+        {
+          urls: "turn:numb.viagenie.ca",
+          credential: "muazkh",
+          username: "webrtc@live.com",
+        },
+      ],
+    },
   });
 };
 
@@ -18,23 +29,72 @@ const useWebRTC = (room: Room) => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    const webRTC = createPeer();
+    const peer = new Peer("player", {
+      host: "localhost",
+      port: 9000,
+      path: "/peerjs",
+      config: {
+        iceServers: [
+          { url: "stun:stun.l.google.com:19302" },
 
-    webRTC.signal(JSON.parse(room.stream_address));
-
-    webRTC.on("signal", (signal) => {
-      webSocketClient.emit("ping", signal);
+          {
+            url: "turn:192.158.29.39:3478?transport=udp",
+            credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+            username: "28224511:1379330808",
+          },
+          {
+            url: "turn:192.158.29.39:3478?transport=tcp",
+            credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+            username: "28224511:1379330808",
+          },
+        ],
+      },
     });
 
-    // // only for player
-    webRTC.on("stream", (mediaStream) => {
-      console.log("mediaStream:", mediaStream);
-      dispatch(setMediaStream(mediaStream));
+    peer.on("call", (call) => {
+      call.answer();
+      // call.answer(stream); // Answer the call with an A/V stream.
+      call.on("stream", (remoteStream) => {
+        console.log(remoteStream);
+        // dispatch(setMediaStream(remoteStream));
+        // Show stream in some <video> element.
+      });
     });
 
-    webSocketClient.on("pong", (streamerAddress) => {
-      webRTC.signal(streamerAddress);
-    });
+    // const conn = peer.connect("streamer");
+    // console.log(conn);
+
+    // peer.on("connection", (connection) => {
+    //   console.log("connection: ", connection);
+    //   // conn.on("data", (data) => {
+
+    //   //   console.log(data);
+    //   // });
+    //   // conn.on("open", () => {
+    //   //   console.log("ping!");
+    //   //   conn.send("hello!");
+    //   // });
+    // });
+
+    // const conn = peer.connect("another-peers-id");
+
+    // const webRTC = createPeer();
+
+    // webRTC.signal(JSON.parse(room.stream_address));
+
+    // webRTC.on("signal", (signal) => {
+    //   webSocketClient.emit("ping", signal);
+    // });
+
+    // // // only for player
+    // webRTC.on("stream", (mediaStream) => {
+    //   console.log("mediaStream:", mediaStream);
+    //   dispatch(setMediaStream(mediaStream));
+    // });
+
+    // webSocketClient.on("pong", (streamerAddress) => {
+    //   webRTC.signal(streamerAddress);
+    // });
   }, []);
 };
 
@@ -107,7 +167,7 @@ const Video = (props: { mediaStream: MediaStream }) => {
   return <Styled.Video ref={videoRef} autoPlay />;
 };
 
-export const PlayerView = () => {
+export const PlayerView2 = () => {
   const { roomId } = useParams();
   const { data, isSuccess } = GameApi.endpoints.getRoomById.useQuery(roomId!);
   const mediaStream = useAppSelector((state) => state.app.mediaStream);
@@ -123,5 +183,49 @@ export const PlayerView = () => {
         {data && <Game room={data} />}
       </Styled.Test>
     </Styled.Container>
+  );
+};
+
+export const PlayerView = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const peer = new Peer("player", {
+      host: "localhost",
+      port: 9000,
+      path: "/peerjs",
+      config: {
+        iceServers: [
+          { url: "stun:stun.l.google.com:19302" },
+
+          {
+            url: "turn:192.158.29.39:3478?transport=udp",
+            credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+            username: "28224511:1379330808",
+          },
+          {
+            url: "turn:192.158.29.39:3478?transport=tcp",
+            credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+            username: "28224511:1379330808",
+          },
+        ],
+      },
+    });
+
+    peer.on("call", (call) => {
+      call.answer();
+      // call.answer(stream); // Answer the call with an A/V stream.
+      call.on("stream", (remoteStream) => {
+        videoRef.current!.srcObject = remoteStream;
+
+        videoRef.current!.play();
+      });
+    });
+  }, []);
+
+  return (
+    <div>
+      <video width={200} height={200} ref={videoRef} autoPlay />
+    </div>
   );
 };

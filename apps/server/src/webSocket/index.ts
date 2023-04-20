@@ -13,7 +13,6 @@ export const webSocket = (httpServer: any) => {
     socket.emit("HANDSHAKE");
 
     socket.on("ping", (signal: string) => {
-      console.log(signal);
       socket.broadcast.emit("pong", signal);
     });
 

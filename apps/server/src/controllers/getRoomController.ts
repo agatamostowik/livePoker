@@ -14,7 +14,6 @@ export const getRoomController = async (req: Request, res: Response) => {
     }
 
     if (data) {
-      console.log("GET Room (SUCCESS):", data[0]);
       res.json(data[0]);
     }
   } catch (error) {

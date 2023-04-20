@@ -8,6 +8,8 @@ import { webSocketClient } from "../../webSocket";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { setMediaStream, setVideoIsPlaying } from "../../redux/slices/app";
 
+import { Peer } from "peerjs";
+
 const useMediaStream = () => {
   const dispatch = useAppDispatch();
   const mediaStream = useAppSelector((state) => state.app.mediaStream);
@@ -33,31 +35,71 @@ const useMediaStream = () => {
   return { mediaStream };
 };
 
-const createPeer = (mediaStream: MediaStream) => {
-  return new SimplePeer({
-    initiator: true,
-    stream: mediaStream,
-    trickle: false,
-  });
-};
+// const createPeer = (mediaStream: MediaStream) => {
+//   return new SimplePeer({
+//     initiator: true,
+//     stream: mediaStream,
+//     trickle: false,
+//     config: {
+//       iceServers: [
+//         {
+//           urls: "turn:numb.viagenie.ca",
+//           credential: "muazkh",
+//           username: "webrtc@live.com",
+//         },
+//       ],
+//     },
+//   });
+// };
 
 const useWebRTC = (mediaStream: MediaStream) => {
   const { roomId } = useParams();
   // const [webRTC] = useState(() => createPeer(mediaStream));
 
   useEffect(() => {
-    const webRTC = createPeer(mediaStream);
-
-    webSocketClient.on("pong", (receiverAddress) => {
-      webRTC.signal(receiverAddress);
+    const peer = new Peer("streamer", {
+      host: "localhost",
+      port: 9000,
+      path: "/peerjs",
+      config: {
+        iceServers: [
+          { url: "stun:stun.l.google.com:19302" },
+          {
+            url: "turn:192.158.29.39:3478?transport=udp",
+            credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+            username: "28224511:1379330808",
+          },
+          {
+            url: "turn:192.158.29.39:3478?transport=tcp",
+            credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+            username: "28224511:1379330808",
+          },
+        ],
+      },
     });
 
-    webRTC.on("signal", async (signal) => {
-      webSocketClient.emit("updateRoom", {
-        roomId: roomId!,
-        streamAddress: signal,
-      });
-    });
+    const call = peer.call("player", mediaStream);
+    // call.on("stream", (remoteStream) => {
+    //   console.log("remoteStream: ", remoteStream);
+    //   // Show stream in some <video> element.
+    // });
+
+    // const webRTC = createPeer(mediaStream);
+
+    // webSocketClient.on("pong", (receiverAddress) => {
+    //   webRTC.signal(receiverAddress);
+    // });
+
+    // webSocketClient.on("iceConnectionState", (status) => {
+    //   console.log(status);
+    // });
+
+    // webRTC.on("signal", async (signal) => {
+    //   webSocketClient.emit("updateRoom", {
+    //     roomId: roomId!,
+    //     streamAddress: signal,
+    //   });
+    // });
   }, []);
 };
 
