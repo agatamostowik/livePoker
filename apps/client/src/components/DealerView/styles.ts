@@ -40,6 +40,10 @@ export const StartBetting = styled.button`
   padding: 10px 20px;
   background-color: pink;
   cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
 `;
 
 export const Board = styled.div`
@@ -60,9 +64,23 @@ export const Aside = styled.div`
   z-index: 1;
 `;
 
-export const Buttons = styled.div``;
+export const Buttons = styled.div`
+  display: flex;
+  gap: 20px;
+`;
 
-export const AAButton = styled.div``;
+export const AAButton = styled.div`
+  border: 5px solid #ffffff;
+  border-radius: 50%;
+  width: 200px;
+  height: 200px;
+  transform: rotateX(50deg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ffffff;
+  font-size: 30px;
+`;
 
 export const AnteButton = styled.div`
   border: 5px solid #ffffff;

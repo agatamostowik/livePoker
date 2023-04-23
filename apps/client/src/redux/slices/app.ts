@@ -29,9 +29,11 @@ export type State = {
   webSocketClient: Socket;
   mediaStream: MediaStream | null;
   isWebSocketConnected: boolean;
-  game: Game | null;
-  round: Round | null;
   videoIsPlaying: boolean;
+  roundBet: {
+    AABet: number[];
+    AnteBet: number[];
+  };
 };
 
 const initialState: State = {
@@ -39,9 +41,11 @@ const initialState: State = {
   webSocketClient: webSocketClient,
   mediaStream: null,
   isWebSocketConnected: false,
-  game: null,
-  round: null,
   videoIsPlaying: false,
+  roundBet: {
+    AABet: [],
+    AnteBet: [],
+  },
 };
 
 const appSlice = createSlice({
@@ -56,19 +60,31 @@ const appSlice = createSlice({
       return { ...state, isWebSocketConnected: action.payload };
     },
 
-    setGame: (state, action: PayloadAction<Game>) => {
-      return { ...state, game: action.payload };
-    },
-    setRound: (state, action: PayloadAction<Round>) => {
-      return { ...state, round: action.payload };
-    },
-
     setVideoIsPlaying: (state, action: PayloadAction<boolean>) => {
       return { ...state, videoIsPlaying: action.payload };
     },
 
-    setMediaStream: (state, action: PayloadAction<MediaStream>) => {
+    setMediaStream: (state, action: PayloadAction<MediaStream | null>) => {
       return { ...state, mediaStream: action.payload };
+    },
+
+    setAABet: (state, action: PayloadAction<number>) => {
+      return {
+        ...state,
+        roundBet: {
+          ...state.roundBet,
+          AABet: [...state.roundBet.AABet, action.payload],
+        },
+      };
+    },
+    setAnteBet: (state, action: PayloadAction<number>) => {
+      return {
+        ...state,
+        roundBet: {
+          ...state.roundBet,
+          AnteBet: [...state.roundBet.AnteBet, action.payload],
+        },
+      };
     },
 
     reset: () => {
@@ -81,9 +97,9 @@ export const appReducer = appSlice.reducer;
 export const {
   setMediaStream,
   setVideoIsPlaying,
-  setRound,
-  setGame,
   setUser,
   setIsWebSocketConnected,
+  setAABet,
+  setAnteBet,
   reset,
 } = appSlice.actions;

@@ -63,6 +63,7 @@ export const ChipsContainer = styled.div`
   height: 100%;
   justify-content: center;
   align-items: center;
+  gap: 15px;
 `;
 
 export const Chip = styled.button`
@@ -70,12 +71,53 @@ export const Chip = styled.button`
   border-radius: 50%;
   width: 40px;
   height: 40px;
-  margin-left: 5px;
+  cursor: pointer;
+
+  &:disabled {
+    background-color: grey;
+    cursor: not-allowed;
+  }
 `;
 
-export const Buttons = styled.div``;
+export const PlacedBetChip = styled.div`
+  position: absolute;
+  border-radius: 50%;
+  transform: rotateX(50deg);
+  width: 100px;
+  height: 100px;
+  background-color: green;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
 
-export const AAButton = styled.div``;
+export const ActiveChip = styled.div<{ isActive: boolean }>`
+  border: 5px solid
+    ${(props) => {
+      return props.isActive ? "yellow" : "transparent";
+    }};
+  border-radius: 50%;
+`;
+
+export const Buttons = styled.div`
+  display: flex;
+  gap: 20px;
+`;
+
+export const AAButton = styled.div`
+  position: relative;
+  border: 5px solid #ffffff;
+  border-radius: 50%;
+  width: 200px;
+  height: 200px;
+  transform: rotateX(50deg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ffffff;
+  font-size: 30px;
+`;
 
 export const AnteButton = styled.div`
   border: 5px solid #ffffff;
@@ -94,4 +136,12 @@ export const Test = styled.div`
   width: 100%;
   max-height: 100vh;
   position: relative;
+`;
+
+export const Balance = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 60px;
+  color: #ffffff;
 `;

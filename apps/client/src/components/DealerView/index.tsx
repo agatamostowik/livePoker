@@ -1,6 +1,6 @@
 import { RefObject, useEffect, useLayoutEffect, useRef, useState } from "react";
 import SimplePeer from "simple-peer";
-import _ from "lodash";
+import _, { isUndefined } from "lodash";
 import * as Styled from "./styles";
 import { GameApi } from "../../redux/RTK";
 import { useParams } from "react-router-dom";
@@ -9,6 +9,7 @@ import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { setMediaStream, setVideoIsPlaying } from "../../redux/slices/app";
 
 import { Peer } from "peerjs";
+import { skipToken } from "@reduxjs/toolkit/dist/query";
 
 const useMediaStream = () => {
   const dispatch = useAppDispatch();
@@ -53,11 +54,11 @@ const useMediaStream = () => {
 // };
 
 const useWebRTC = (mediaStream: MediaStream) => {
-  const { roomId } = useParams();
+  // const { roomId } = useParams();
   // const [webRTC] = useState(() => createPeer(mediaStream));
 
   useEffect(() => {
-    const peer = new Peer("streamer", {
+    const peer = new Peer("dealer", {
       host: "localhost",
       port: 9000,
       path: "/peerjs",
@@ -78,28 +79,24 @@ const useWebRTC = (mediaStream: MediaStream) => {
       },
     });
 
-    const call = peer.call("player", mediaStream);
-    // call.on("stream", (remoteStream) => {
-    //   console.log("remoteStream: ", remoteStream);
-    //   // Show stream in some <video> element.
-    // });
+    peer.on("error", (error) => {
+      console.log("error", error);
+    });
 
-    // const webRTC = createPeer(mediaStream);
+    peer.on("connection", () => {
+      peer.call("player", mediaStream);
+      console.log("connected");
+    });
 
-    // webSocketClient.on("pong", (receiverAddress) => {
-    //   webRTC.signal(receiverAddress);
-    // });
+    peer.on("open", () => {
+      peer.call("player", mediaStream);
+      console.log("opened");
+    });
 
-    // webSocketClient.on("iceConnectionState", (status) => {
-    //   console.log(status);
-    // });
-
-    // webRTC.on("signal", async (signal) => {
-    //   webSocketClient.emit("updateRoom", {
-    //     roomId: roomId!,
-    //     streamAddress: signal,
-    //   });
-    // });
+    peer.on("disconnected", () => {
+      peer.reconnect();
+      console.log("disconnected");
+    });
   }, []);
 };
 
@@ -112,7 +109,7 @@ const Game = (props: { mediaStream: MediaStream }) => {
     <Styled.Game>
       <Styled.Board>
         <Styled.Buttons>
-          {/* <Styled.AAButton>AA</Styled.AAButton> */}
+          <Styled.AAButton>AA</Styled.AAButton>
           <Styled.AnteButton>Ante</Styled.AnteButton>
         </Styled.Buttons>
       </Styled.Board>
@@ -121,15 +118,28 @@ const Game = (props: { mediaStream: MediaStream }) => {
 };
 
 const Sidebar = () => {
-  const game = useAppSelector((state) => state.app.game);
-  const round = useAppSelector((state) => state.app.round);
   const videoIsPlaying = useAppSelector((state) => state.app.videoIsPlaying);
+  const { roomId } = useParams();
+  const { data: room, isLoading: isRoomLoading } =
+    GameApi.endpoints.getRoomById.useQuery(roomId!);
+  const { data: game, isLoading: isGameLoading } =
+    GameApi.endpoints.getGameByRoomId.useQuery(room ? room.id : skipToken);
+  const { data: round, isLoading: isRoundLoading } =
+    GameApi.endpoints.getRoundByGameId.useQuery(game ? game.id : skipToken);
 
   const handleStartBetting = () => {
     webSocketClient.emit("startBetting", {
+      roomId: game?.room_id,
       gameId: game?.id,
       playerId: game?.player_id,
+    });
+  };
+
+  const handleStopBetting = () => {
+    webSocketClient.emit("stopBetting", {
       roomId: game?.room_id,
+      gameId: game?.id,
+      roundId: round?.id,
     });
   };
 
@@ -143,12 +153,32 @@ const Sidebar = () => {
         <div>Waiting for player to join the game...</div>
       )}
 
-      <Styled.StartBetting
-        disabled={game == null || round !== null}
-        onClick={handleStartBetting}
-      >
-        Start taking bets
-      </Styled.StartBetting>
+      {game &&
+        (round ? (
+          <div>Dealer started the round</div>
+        ) : (
+          <div>Waiting for round get started...</div>
+        ))}
+
+      <div>
+        <Styled.StartBetting
+          disabled={game == null || round !== null}
+          onClick={handleStartBetting}
+        >
+          Start taking bets
+        </Styled.StartBetting>
+      </div>
+
+      <div>
+        <Styled.StartBetting
+          disabled={game == null || round?.ante_bet !== null}
+          onClick={handleStopBetting}
+        >
+          Stop taking bets
+        </Styled.StartBetting>
+      </div>
+
+      <div>Video is playing: {videoIsPlaying.toString()}</div>
     </Styled.Aside>
   );
 };
@@ -168,13 +198,28 @@ const Video = (props: { mediaStream: MediaStream }) => {
 };
 
 export const DealerView = () => {
-  const { roomId } = useParams();
-  const { isSuccess } = GameApi.endpoints.getRoomById.useQuery(roomId!);
+  // const { roomId } = useParams();
+  // const {
+  //   data: room,
+  //   isLoading: isRoomLoading,
+  //   isSuccess: isRoomSuccess,
+  // } = GameApi.endpoints.getRoomById.useQuery(roomId!);
+  // const {
+  //   data: game,
+  //   isLoading: isGameLoading,
+  //   isSuccess: isGameSuccess,
+  // } = GameApi.endpoints.getGameByRoomId.useQuery(room ? room.id : skipToken);
+  // const {
+  //   data: round,
+  //   isLoading: isRoundLoading,
+  //   isSuccess: isRoundSuccess,
+  // } = GameApi.endpoints.getRoundByGameId.useQuery(game ? game.id : skipToken);
+
   const { mediaStream } = useMediaStream();
 
-  if (!isSuccess) {
-    return <div>Loading</div>;
-  }
+  // if (!isRoomSuccess) {
+  //   return <div>Loading</div>;
+  // }
 
   return (
     <Styled.Container>

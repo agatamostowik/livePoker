@@ -29,13 +29,17 @@ export const webSocket = (httpServer: any) => {
     });
 
     socket.on("updateRoom", async (params) => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("rooms")
         .update({
           stream_address: params.streamAddress,
         })
         .eq("id", params.roomId)
         .select("*");
+
+      if (error) {
+        console.error(error);
+      }
 
       if (data) {
         const roomId = data[0].id;
@@ -46,7 +50,7 @@ export const webSocket = (httpServer: any) => {
     });
 
     socket.on("startGame", async (params) => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("games")
         .insert([
           {
@@ -58,9 +62,13 @@ export const webSocket = (httpServer: any) => {
         ])
         .select("*");
 
+      if (error) {
+        console.error(error);
+      }
+
       if (data) {
-        socket.emit("gameStarted", data[0]);
-        socket.broadcast.emit("gameStarted", data[0]);
+        socket.emit("gameStarted", params.roomId);
+        socket.broadcast.emit("gameStarted", params.roomId);
       }
     });
 
@@ -76,10 +84,19 @@ export const webSocket = (httpServer: any) => {
         ])
         .select("*");
 
-      if (data) {
-        socket.emit("bettingStarted", data[0]);
-        socket.broadcast.emit("bettingStarted", data[0]);
+      if (error) {
+        console.error(error);
       }
+
+      if (data) {
+        socket.emit("bettingStarted", params.gameId);
+        socket.broadcast.emit("bettingStarted", params.gameId);
+      }
+    });
+
+    socket.on("stopBetting", (params) => {
+      socket.emit("bettingStoped", params);
+      socket.broadcast.emit("bettingStoped", params);
     });
   });
 

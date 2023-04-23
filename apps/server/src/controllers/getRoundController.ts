@@ -2,12 +2,12 @@ import { Request, Response } from "express";
 import _ from "lodash";
 import { supabase } from "../db";
 
-export const getRoomController = async (req: Request, res: Response) => {
+export const getRoundController = async (req: Request, res: Response) => {
   try {
     const { data, error } = await supabase
-      .from("rooms")
+      .from("rounds")
       .select("*")
-      .eq("id", req.params.roomId);
+      .eq("id", req.params.roundId);
 
     if (error) {
       res.status(400).json({ status: "error", error: error });

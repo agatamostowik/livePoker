@@ -13,7 +13,7 @@ export const createRoomController = async (req: Request, res: Response) => {
       res.status(400).json({ status: "error", error: error });
     }
 
-    if (data) {
+    if (!_.isNull(data)) {
       res.json(data[0]);
     }
   } catch (error) {

@@ -1,11 +1,6 @@
 import { io } from "socket.io-client";
-import {
-  Game,
-  Round,
-  setGame,
-  setRound,
-  setIsWebSocketConnected,
-} from "../redux/slices/app";
+import { Game, Round, setIsWebSocketConnected } from "../redux/slices/app";
+import _ from "lodash";
 import { store } from "../redux/store";
 import { GameApi, Room } from "../redux/RTK";
 
@@ -20,15 +15,37 @@ webSocketClient.on("roomCreated", async () => {
   await result.refetch();
 });
 
-webSocketClient.on("gameStarted", (data: Game) => {
-  store.dispatch(setGame(data));
+webSocketClient.on("gameStarted", async (roomId: string) => {
+  const result = store.dispatch(
+    GameApi.endpoints.getGameByRoomId.initiate(roomId)
+  );
+  await result.refetch();
 });
 
-webSocketClient.on("bettingStarted", (data: Round) => {
-  store.dispatch(setRound(data));
+webSocketClient.on("bettingStarted", async (gameId: string) => {
+  const result = store.dispatch(
+    GameApi.endpoints.getRoundByGameId.initiate(gameId)
+  );
+
+  await result.refetch();
 });
 
 webSocketClient.on("roomUpdated", async (roomId: string) => {
   const result = store.dispatch(GameApi.endpoints.getRoomById.initiate(roomId));
   await result.refetch();
 });
+
+webSocketClient.on(
+  "bettingStoped",
+  async (params: { roomId: string; gameId: string; roundId: string }) => {
+    const state = store.getState();
+
+    const result = store.dispatch(
+      GameApi.endpoints.makePlayerBets.initiate({
+        roundId: params.roundId,
+        AABet: _.sum(state.app.roundBet.AABet),
+        AnteBet: _.sum(state.app.roundBet.AnteBet),
+      })
+    );
+  }
+);

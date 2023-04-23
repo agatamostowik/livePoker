@@ -45,10 +45,27 @@ type Game = {
   game_over: boolean;
 };
 
+type Round = {
+  id: string;
+  created_at: string;
+  aa_bet: number;
+  ante_bet: number;
+  game_id: string;
+  room_id: string;
+  isActive: boolean;
+  player_id: string;
+};
+
 type CreateGamePayload = {
   roomId: string;
   playerId: string;
   dealerId: string;
+};
+
+type MakeBetsPayload = {
+  roundId: string;
+  AABet: number;
+  AnteBet: number;
 };
 
 export const GameApi = createApi({
@@ -67,12 +84,30 @@ export const GameApi = createApi({
         return { url: `/api/rooms/${roomId}`, method: "GET" };
       },
     }),
+    getGameByRoomId: builder.query<Game, string>({
+      query: (roomId) => {
+        return { url: `/api/games/find?roomId=${roomId}`, method: "GET" };
+      },
+    }),
+    getRoundByGameId: builder.query<Round, string>({
+      query: (gameId) => {
+        return { url: `/api/rounds/find?gameId=${gameId}`, method: "GET" };
+      },
+    }),
+
+    getRound: builder.query<Round, string>({
+      query: (roundId) => {
+        return { url: `/api/rounds/${roundId}`, method: "GET" };
+      },
+    }),
+
     getRooms: builder.query<Rooms, void>({
       query: () => ({
         url: "/api/rooms",
         method: "GET",
       }),
     }),
+
     createRoom: builder.mutation<Response, CreateRoomPayload>({
       query: (payload) => ({
         url: "/api/rooms",
@@ -80,12 +115,14 @@ export const GameApi = createApi({
         body: payload,
       }),
     }),
+
     getUserAccount: builder.query<Account, string>({
       query: (userId) => ({
         url: `/api/auth/me?userId=${userId}`,
         method: "GET",
       }),
     }),
+
     updateRoom: builder.mutation<Room, UpdateRoomPayload>({
       query: (payload) => {
         const { roomId, ...body } = payload;
@@ -97,12 +134,25 @@ export const GameApi = createApi({
         };
       },
     }),
+
     startGame: builder.mutation<Game, CreateGamePayload>({
       query: (payload) => {
         const { roomId, ...body } = payload;
 
         return {
           url: `/api/rooms/${roomId}/start-game`,
+          method: "POST",
+          body: body,
+        };
+      },
+    }),
+
+    makePlayerBets: builder.mutation<any, MakeBetsPayload>({
+      query: (payload) => {
+        const { roundId, ...body } = payload;
+
+        return {
+          url: `/api/rounds/${roundId}/bets`,
           method: "POST",
           body: body,
         };

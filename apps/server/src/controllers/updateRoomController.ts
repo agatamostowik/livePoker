@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { supabase } from "../db";
+import _ from "lodash";
 
 export const updateRoomController = async (req: Request, res: Response) => {
   try {
@@ -19,7 +20,7 @@ export const updateRoomController = async (req: Request, res: Response) => {
       res.status(400).json({ status: "error", error: error });
     }
 
-    if (data) {
+    if (!_.isNull(data)) {
       res.json(data[0]);
     }
   } catch (error) {
