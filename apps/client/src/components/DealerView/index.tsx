@@ -1,19 +1,23 @@
-import { RefObject, useEffect, useLayoutEffect, useRef, useState } from "react";
-import SimplePeer from "simple-peer";
-import _, { isUndefined } from "lodash";
-import * as Styled from "./styles";
-import { GameApi } from "../../redux/RTK";
+import { useEffect, useRef } from "react";
+import _ from "lodash";
+import { GameApi, Room } from "../../redux/RTK";
 import { useParams } from "react-router-dom";
 import { webSocketClient } from "../../webSocket";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
-import { setMediaStream, setVideoIsPlaying } from "../../redux/slices/app";
-
+import { setMediaStream } from "../../redux/slices/app";
+import * as Styled from "./styles";
 import { Peer } from "peerjs";
 import { skipToken } from "@reduxjs/toolkit/dist/query";
+import { Cards } from "../Cards";
+import {
+  useGetGameByRoomIdOnMount,
+  useGetRoomOnMount,
+  useGetRoundByGameIdOnMount,
+} from "../../hooks";
+import { Video } from "../Video";
 
 const useMediaStream = () => {
   const dispatch = useAppDispatch();
-  const mediaStream = useAppSelector((state) => state.app.mediaStream);
 
   const getMediaStream = async () => {
     try {
@@ -32,86 +36,94 @@ const useMediaStream = () => {
   useEffect(() => {
     getMediaStream();
   }, []);
-
-  return { mediaStream };
 };
 
-// const createPeer = (mediaStream: MediaStream) => {
-//   return new SimplePeer({
-//     initiator: true,
-//     stream: mediaStream,
-//     trickle: false,
-//     config: {
-//       iceServers: [
-//         {
-//           urls: "turn:numb.viagenie.ca",
-//           credential: "muazkh",
-//           username: "webrtc@live.com",
-//         },
-//       ],
-//     },
-//   });
-// };
-
-const useWebRTC = (mediaStream: MediaStream) => {
-  // const { roomId } = useParams();
-  // const [webRTC] = useState(() => createPeer(mediaStream));
+const useWebRTC = () => {
+  const mediaStream = useAppSelector((state) => state.app.mediaStream);
 
   useEffect(() => {
-    const peer = new Peer("dealer", {
-      host: "localhost",
-      port: 9000,
-      path: "/peerjs",
-      config: {
-        iceServers: [
-          { url: "stun:stun.l.google.com:19302" },
-          {
-            url: "turn:192.158.29.39:3478?transport=udp",
-            credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
-            username: "28224511:1379330808",
-          },
-          {
-            url: "turn:192.158.29.39:3478?transport=tcp",
-            credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
-            username: "28224511:1379330808",
-          },
-        ],
-      },
-    });
+    if (mediaStream) {
+      const peer = new Peer("dealer", {
+        host: "localhost",
+        port: 9000,
+        path: "/peerjs",
+        // config: {
+        //   iceServers: [
+        //     { url: "stun:stun.l.google.com:19302" },
+        //     {
+        //       url: "turn:192.158.29.39:3478?transport=udp",
+        //       credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+        //       username: "28224511:1379330808",
+        //     },
+        //     {
+        //       url: "turn:192.158.29.39:3478?transport=tcp",
+        //       credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+        //       username: "28224511:1379330808",
+        //     },
+        //   ],
+        // },
+      });
 
-    peer.on("error", (error) => {
-      console.log("error", error);
-    });
+      peer.on("error", (error) => {
+        console.log("error", error);
+      });
 
-    peer.on("connection", () => {
-      peer.call("player", mediaStream);
-      console.log("connected");
-    });
+      peer.on("connection", () => {
+        peer.call("player", mediaStream);
+        console.log("connected");
+      });
 
-    peer.on("open", () => {
-      peer.call("player", mediaStream);
-      console.log("opened");
-    });
+      peer.on("open", () => {
+        peer.call("player", mediaStream);
+        console.log("opened");
+      });
 
-    peer.on("disconnected", () => {
-      peer.reconnect();
-      console.log("disconnected");
-    });
-  }, []);
+      peer.on("disconnected", () => {
+        peer.reconnect();
+        console.log("disconnected");
+      });
+    }
+  }, [mediaStream]);
 };
 
-const Game = (props: { mediaStream: MediaStream }) => {
-  const { mediaStream } = props;
+const Buttons = () => {
+  const { roomId } = useParams();
+  const { data: room } = GameApi.endpoints.getRoomById.useQuery(roomId!);
+  const { data: game } = GameApi.endpoints.getGameByRoomId.useQuery(
+    room ? room.id : skipToken
+  );
+  const { data: round } = GameApi.endpoints.getRoundByGameId.useQuery(
+    game ? game.id : skipToken
+  );
 
-  useWebRTC(mediaStream);
+  const AABetSum = _.sum(round?.aa_bet);
+  const anteBetSum = _.sum(round?.ante_bet);
 
+  return (
+    <Styled.Buttons>
+      <Styled.AAButton>
+        AA
+        {AABetSum > 0 && (
+          <Styled.PlacedBetChip>{AABetSum}</Styled.PlacedBetChip>
+        )}
+      </Styled.AAButton>
+      <Styled.AnteButton>
+        ANTE
+        {anteBetSum > 0 && (
+          <Styled.PlacedBetChip>{anteBetSum}</Styled.PlacedBetChip>
+        )}
+      </Styled.AnteButton>
+      <Styled.AnteButton>Play</Styled.AnteButton>
+    </Styled.Buttons>
+  );
+};
+
+const Game = () => {
   return (
     <Styled.Game>
       <Styled.Board>
-        <Styled.Buttons>
-          <Styled.AAButton>AA</Styled.AAButton>
-          <Styled.AnteButton>Ante</Styled.AnteButton>
-        </Styled.Buttons>
+        <Cards />
+        <Buttons />
       </Styled.Board>
     </Styled.Game>
   );
@@ -120,12 +132,13 @@ const Game = (props: { mediaStream: MediaStream }) => {
 const Sidebar = () => {
   const videoIsPlaying = useAppSelector((state) => state.app.videoIsPlaying);
   const { roomId } = useParams();
-  const { data: room, isLoading: isRoomLoading } =
-    GameApi.endpoints.getRoomById.useQuery(roomId!);
-  const { data: game, isLoading: isGameLoading } =
-    GameApi.endpoints.getGameByRoomId.useQuery(room ? room.id : skipToken);
-  const { data: round, isLoading: isRoundLoading } =
-    GameApi.endpoints.getRoundByGameId.useQuery(game ? game.id : skipToken);
+  const { data: room } = GameApi.endpoints.getRoomById.useQuery(roomId!);
+  const { data: game } = GameApi.endpoints.getGameByRoomId.useQuery(
+    room ? room.id : skipToken
+  );
+  const { data: round } = GameApi.endpoints.getRoundByGameId.useQuery(
+    game ? game.id : skipToken
+  );
 
   const handleStartBetting = () => {
     webSocketClient.emit("startBetting", {
@@ -137,10 +150,14 @@ const Sidebar = () => {
 
   const handleStopBetting = () => {
     webSocketClient.emit("stopBetting", {
-      roomId: game?.room_id,
-      gameId: game?.id,
       roundId: round?.id,
+      playerId: game?.player_id,
+      gameId: game?.id,
     });
+  };
+
+  const showCards = () => {
+    webSocketClient.emit("showCards", round?.id);
   };
 
   return (
@@ -160,6 +177,14 @@ const Sidebar = () => {
           <div>Waiting for round get started...</div>
         ))}
 
+      {game &&
+        round &&
+        (round?.bets_over ? (
+          <div>Zakłady zakończone</div>
+        ) : (
+          <div>Przyjmowanie zakładów</div>
+        ))}
+
       <div>
         <Styled.StartBetting
           disabled={game == null || round !== null}
@@ -171,10 +196,16 @@ const Sidebar = () => {
 
       <div>
         <Styled.StartBetting
-          disabled={game == null || round?.ante_bet !== null}
+          disabled={game == null || round === null || round?.bets_over === true}
           onClick={handleStopBetting}
         >
           Stop taking bets
+        </Styled.StartBetting>
+      </div>
+
+      <div>
+        <Styled.StartBetting onClick={showCards}>
+          wyłóż karty
         </Styled.StartBetting>
       </div>
 
@@ -183,54 +214,19 @@ const Sidebar = () => {
   );
 };
 
-const Video = (props: { mediaStream: MediaStream }) => {
-  const { mediaStream } = props;
-
-  const dispatch = useAppDispatch();
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    videoRef.current!.srcObject = mediaStream;
-    dispatch(setVideoIsPlaying(true));
-  }, []);
-
-  return <Styled.Video ref={videoRef} autoPlay />;
-};
-
 export const DealerView = () => {
-  // const { roomId } = useParams();
-  // const {
-  //   data: room,
-  //   isLoading: isRoomLoading,
-  //   isSuccess: isRoomSuccess,
-  // } = GameApi.endpoints.getRoomById.useQuery(roomId!);
-  // const {
-  //   data: game,
-  //   isLoading: isGameLoading,
-  //   isSuccess: isGameSuccess,
-  // } = GameApi.endpoints.getGameByRoomId.useQuery(room ? room.id : skipToken);
-  // const {
-  //   data: round,
-  //   isLoading: isRoundLoading,
-  //   isSuccess: isRoundSuccess,
-  // } = GameApi.endpoints.getRoundByGameId.useQuery(game ? game.id : skipToken);
-
-  const { mediaStream } = useMediaStream();
-
-  // if (!isRoomSuccess) {
-  //   return <div>Loading</div>;
-  // }
+  useMediaStream();
+  useWebRTC();
+  useGetRoomOnMount();
+  useGetGameByRoomIdOnMount();
+  useGetRoundByGameIdOnMount();
 
   return (
     <Styled.Container>
       <Sidebar />
       <Styled.Test>
-        {mediaStream && (
-          <>
-            <Video mediaStream={mediaStream} />
-            <Game mediaStream={mediaStream} />
-          </>
-        )}
+        <Video />
+        <Game />
       </Styled.Test>
     </Styled.Container>
   );

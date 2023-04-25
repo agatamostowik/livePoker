@@ -14,13 +14,11 @@ export const Button = styled.button`
   position: absolute;
   top: 0;
   right: 0;
-  z-index: 2;
 `;
 
 export const H1 = styled.h1`
   position: absolute;
   top: 0;
-  z-index: 0;
 `;
 
 export const Game = styled.div`
@@ -32,10 +30,6 @@ export const Game = styled.div`
   right: 0;
 `;
 
-export const Video = styled.video`
-  width: 100%;
-  max-height: 100vh;
-`;
 export const StartBetting = styled.button`
   padding: 10px 20px;
   background-color: pink;
@@ -51,8 +45,9 @@ export const Board = styled.div`
   height: 100%;
   position: relative;
   display: flex;
-  justify-content: center;
-  align-items: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: column;
 `;
 
 export const Aside = styled.div`
@@ -61,20 +56,22 @@ export const Aside = styled.div`
   width: 300px;
   position: absolute;
   left: 0;
-  z-index: 1;
+  z-index: 2;
 `;
 
 export const Buttons = styled.div`
   display: flex;
+  position: absolute;
+  bottom: 10px;
   gap: 20px;
 `;
 
 export const AAButton = styled.div`
+  cursor: pointer;
   border: 5px solid #ffffff;
-  border-radius: 50%;
+  border-radius: 10px;
   width: 200px;
-  height: 200px;
-  transform: rotateX(50deg);
+  height: 80px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -83,11 +80,11 @@ export const AAButton = styled.div`
 `;
 
 export const AnteButton = styled.div`
+  cursor: pointer;
   border: 5px solid #ffffff;
-  border-radius: 50%;
+  border-radius: 10px;
   width: 200px;
-  height: 200px;
-  transform: rotateX(50deg);
+  height: 80px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -99,4 +96,17 @@ export const Test = styled.div`
   width: 100%;
   max-height: 100vh;
   position: relative;
+`;
+
+export const PlacedBetChip = styled.div`
+  position: absolute;
+  border-radius: 50%;
+  transform: rotateX(50deg);
+  width: 100px;
+  height: 100px;
+  background-color: green;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;

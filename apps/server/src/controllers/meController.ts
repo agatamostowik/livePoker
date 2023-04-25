@@ -7,7 +7,7 @@ export const meController = async (req: Request, res: Response) => {
     const { data, error } = await supabase
       .from("accounts")
       .select("*")
-      .eq("user_id", `${req.query.userId}`);
+      .eq("user_id", req.query.userId);
 
     if (error) {
       res.status(400).json({ status: "error", error: error });
@@ -19,7 +19,6 @@ export const meController = async (req: Request, res: Response) => {
       res.status(400).json({ status: "error", error: "something went wrong!" });
     }
   } catch (error) {
-    // TODO: Handle error
-    console.log(error);
+    res.status(400).json({ status: "error", error: error });
   }
 };

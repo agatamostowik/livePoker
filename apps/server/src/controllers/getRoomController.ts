@@ -15,6 +15,8 @@ export const getRoomController = async (req: Request, res: Response) => {
 
     if (!_.isNull(data)) {
       res.json(data[0]);
+    } else {
+      res.status(400).json({ status: "error", error: "something went wrong!" });
     }
   } catch (error) {
     res.status(400).json({ status: "error", error: error });

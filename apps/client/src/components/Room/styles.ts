@@ -13,7 +13,6 @@ export const Button = styled.button`
   position: absolute;
   top: 0;
   right: 0;
-  z-index: 2;
 `;
 
 export const Floating = styled.div`
@@ -26,21 +25,10 @@ export const Floating = styled.div`
 export const H1 = styled.h1`
   position: absolute;
   top: 0;
-  z-index: 0;
 `;
 
 export const Video = styled.video`
-  /* position: fixed;
-  object-fit: fill;
-  z-index: -1;
-  height: 100%;
-  transform: scale(-1, 1);
-  width: 100%;
-  position: absolute;
-  top: 0;
-  left: 0; */
   aspect-ratio: 16 / 9;
-  z-index: -1;
   height: 100%;
   transform: scale(-1, 1);
   width: 100%;

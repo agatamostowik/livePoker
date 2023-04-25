@@ -14,18 +14,16 @@ export const Button = styled.button`
   position: absolute;
   top: 0;
   right: 0;
-  z-index: 2;
 `;
 
 export const H1 = styled.h1`
   position: absolute;
   top: 0;
-  z-index: 0;
 `;
 
 export const Game = styled.div`
   position: absolute;
-  z-index: 1;
+
   top: 0;
   bottom: 0;
   left: 0;
@@ -102,16 +100,17 @@ export const ActiveChip = styled.div<{ isActive: boolean }>`
 
 export const Buttons = styled.div`
   display: flex;
+  position: absolute;
+  bottom: 10px;
   gap: 20px;
 `;
 
 export const AAButton = styled.div`
-  position: relative;
+  cursor: pointer;
   border: 5px solid #ffffff;
-  border-radius: 50%;
+  border-radius: 10px;
   width: 200px;
-  height: 200px;
-  transform: rotateX(50deg);
+  height: 80px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -120,11 +119,11 @@ export const AAButton = styled.div`
 `;
 
 export const AnteButton = styled.div`
+  cursor: pointer;
   border: 5px solid #ffffff;
-  border-radius: 50%;
+  border-radius: 10px;
   width: 200px;
-  height: 200px;
-  transform: rotateX(50deg);
+  height: 80px;
   display: flex;
   justify-content: center;
   align-items: center;

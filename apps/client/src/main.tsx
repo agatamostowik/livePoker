@@ -1,15 +1,15 @@
-import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   createBrowserRouter,
   createRoutesFromElements,
   Navigate,
+  redirect,
   Route,
   RouterProvider,
 } from "react-router-dom";
 import { Provider } from "react-redux";
 import { Layout } from "./components/Layout";
-import { store, useAppDispatch } from "./redux/store";
+import { store, useAppDispatch, useAppSelector } from "./redux/store";
 import { Rooms } from "./components/Rooms";
 import { Room } from "./components/Room";
 import { GlobalStyle } from "./GlobalStyle";
@@ -19,36 +19,7 @@ import { supabase } from "./db";
 import "sanitize.css";
 
 const Routes = () => {
-  const [isLoading, setIsLoading] = useState(true);
   const dispatch = useAppDispatch();
-
-  const getUser = async () => {
-    setIsLoading(true);
-
-    try {
-      const { data, error } = await supabase.auth.getUser();
-
-      if (error) {
-        //  TODO: handle error
-      }
-
-      if (data.user) {
-        dispatch(setUser(data.user));
-      }
-    } catch (error) {
-      // TODO: handle error
-    }
-
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    getUser();
-  }, []);
-
-  if (isLoading) {
-    return <div>LOADING</div>;
-  }
 
   return (
     <RouterProvider
@@ -56,8 +27,35 @@ const Routes = () => {
         createRoutesFromElements(
           <Route path="/" element={<Layout />}>
             <Route index element={<Navigate replace to="rooms" />} />
-            <Route path="signin" element={<Signin />} />
-            <Route path="rooms">
+            <Route
+              path="signin"
+              loader={async () => {
+                const { data } = await supabase.auth.getUser();
+
+                if (data.user) {
+                  dispatch(setUser(data.user));
+                  redirect("/rooms");
+                }
+
+                return null;
+              }}
+              element={<Signin />}
+            />
+            <Route
+              path="rooms"
+              loader={async () => {
+                // https://reactrouter.com/en/main/start/overview#redirects
+                const { data } = await supabase.auth.getUser();
+
+                if (data.user) {
+                  dispatch(setUser(data.user));
+                } else {
+                  throw redirect("/signin");
+                }
+
+                return null;
+              }}
+            >
               <Route index element={<Rooms />} />
               <Route path=":roomId" element={<Room />} />
             </Route>
@@ -78,5 +76,7 @@ createRoot(rootElement).render(
   </Provider>
 );
 
-// <StrictMode>
-// </StrictMode>
+{
+  /* <StrictMode>
+</StrictMode> */
+}

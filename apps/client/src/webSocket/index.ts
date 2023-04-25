@@ -1,5 +1,12 @@
 import { io } from "socket.io-client";
-import { Game, Round, setIsWebSocketConnected } from "../redux/slices/app";
+import {
+  Game,
+  Round,
+  addCommonCards,
+  addDealerCards,
+  addPlayerCards,
+  setIsWebSocketConnected,
+} from "../redux/slices/app";
 import _ from "lodash";
 import { store } from "../redux/store";
 import { GameApi, Room } from "../redux/RTK";
@@ -11,41 +18,47 @@ webSocketClient.on("HANDSHAKE", () => {
 });
 
 webSocketClient.on("roomCreated", async () => {
-  const result = store.dispatch(GameApi.endpoints.getRooms.initiate());
-  await result.refetch();
+  store.dispatch(GameApi.endpoints.getRooms.initiate()).refetch();
 });
 
 webSocketClient.on("gameStarted", async (roomId: string) => {
-  const result = store.dispatch(
-    GameApi.endpoints.getGameByRoomId.initiate(roomId)
-  );
-  await result.refetch();
+  store.dispatch(GameApi.endpoints.getGameByRoomId.initiate(roomId)).refetch();
 });
 
 webSocketClient.on("bettingStarted", async (gameId: string) => {
-  const result = store.dispatch(
-    GameApi.endpoints.getRoundByGameId.initiate(gameId)
-  );
-
-  await result.refetch();
+  store.dispatch(GameApi.endpoints.getRoundByGameId.initiate(gameId)).refetch();
 });
 
-webSocketClient.on("roomUpdated", async (roomId: string) => {
-  const result = store.dispatch(GameApi.endpoints.getRoomById.initiate(roomId));
-  await result.refetch();
+webSocketClient.on("roomUpdated", (roomId: string) => {
+  store.dispatch(GameApi.endpoints.getRoomById.initiate(roomId)).refetch();
+});
+
+webSocketClient.on("madeAnteBet", (gameId: string) => {
+  const result = store
+    .dispatch(GameApi.endpoints.getRoundByGameId.initiate(gameId))
+    .refetch();
 });
 
 webSocketClient.on(
-  "bettingStoped",
-  async (params: { roomId: string; gameId: string; roundId: string }) => {
-    const state = store.getState();
+  "bettingStopped",
+  (params: { userId: string; gameId: string }) => {
+    const { userId, gameId } = params;
+    store
+      .dispatch(GameApi.endpoints.getRoundByGameId.initiate(gameId))
+      .refetch();
 
-    const result = store.dispatch(
-      GameApi.endpoints.makePlayerBets.initiate({
-        roundId: params.roundId,
-        AABet: _.sum(state.app.roundBet.AABet),
-        AnteBet: _.sum(state.app.roundBet.AnteBet),
-      })
-    );
+    // store.dispatch(GameApi.endpoints.getUserAccount.initiate(userId)).refetch();
   }
 );
+
+webSocketClient.on("playDealerCard", (card: string) => {
+  store.dispatch(addDealerCards(card));
+});
+
+webSocketClient.on("playCommonCard", (card: string) => {
+  store.dispatch(addCommonCards(card));
+});
+
+webSocketClient.on("playPlayerCard", (card: string) => {
+  store.dispatch(addPlayerCards(card));
+});

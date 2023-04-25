@@ -23,6 +23,12 @@ export const Rooms = () => {
 
   return (
     <div>
+      {user && (
+        <div>
+          <div>{user.email}</div>
+        </div>
+      )}
+      <div></div>
       {_.isEmpty(data) ? (
         <div>Poczekaj na stworzenie pokoju przez Dealera</div>
       ) : (

@@ -5,16 +5,15 @@ import { GameApi } from "../../redux/RTK";
 import { useAppSelector } from "../../redux/store";
 import { webSocketClient } from "../../webSocket";
 import { Modal } from "../Modal";
+import { skipToken } from "@reduxjs/toolkit/dist/query";
 
 export const CreateRoomModal = () => {
-  const navigate = useNavigate();
-  const [createRoom] = GameApi.endpoints.createRoom.useMutation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [name, setName] = useState("");
   const user = useAppSelector((state) => state.app.user);
-  const userAccount = GameApi.endpoints.getUserAccount.useQuery(user?.id!, {
-    skip: _.isNull(user),
-  });
+  const userAccount = GameApi.endpoints.getUserAccount.useQuery(
+    user ? user.id : skipToken
+  );
 
   const handleCreateRoom = async () => {
     webSocketClient.emit("createRoom", {
@@ -37,12 +36,11 @@ export const CreateRoomModal = () => {
     setName(event.target.value);
   };
 
+  const isPlayer = userAccount.data?.role === "player";
+
   return (
     <>
-      <button
-        onClick={handleOpenModal}
-        disabled={userAccount.data?.role === "player"}
-      >
+      <button onClick={handleOpenModal} disabled={isPlayer}>
         Create room
       </button>
       {isModalOpen && (

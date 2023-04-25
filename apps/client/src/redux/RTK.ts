@@ -48,12 +48,13 @@ type Game = {
 type Round = {
   id: string;
   created_at: string;
-  aa_bet: number;
-  ante_bet: number;
   game_id: string;
   room_id: string;
-  isActive: boolean;
+  is_active: boolean;
   player_id: string;
+  aa_bet: number[];
+  ante_bet: number[];
+  bets_over: boolean;
 };
 
 type CreateGamePayload = {
