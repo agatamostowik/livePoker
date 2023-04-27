@@ -1,29 +1,24 @@
 import { ChangeEvent, MouseEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../redux/store";
-import { setUser } from "../../redux/slices/app";
 import { supabase } from "../../db";
-
-const signInWithEmail = async (email: string, password: string) => {
-  const response = await supabase.auth.signInWithPassword({
-    email: email,
-    password: password,
-  });
-
-  return response;
-};
-
-const signOut = async () => {
-  const { error } = await supabase.auth.signOut();
-
-  return error;
-};
+import { setUser } from "../../redux/slices/auth";
 
 export const Signin = () => {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const dispatch = useAppDispatch();
+  const [isError, setIsError] = useState(false);
+
+  const signInWithEmail = async (email: string, password: string) => {
+    const response = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
+    });
+
+    return response;
+  };
 
   const handleEmail = (event: ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
@@ -37,19 +32,15 @@ export const Signin = () => {
     event.preventDefault();
 
     try {
-      const { data, error } = await signInWithEmail(email, password);
-
-      if (error) {
-        //  TODO: handle error
-      }
+      const { data } = await signInWithEmail(email, password);
 
       if (data.user) {
+        setIsError(false);
         dispatch(setUser(data.user));
-
         navigate("/rooms");
       }
     } catch (error) {
-      // TODO: handle error
+      setIsError(true);
     }
   };
 
@@ -67,6 +58,7 @@ export const Signin = () => {
         onChange={handlePassword}
         autoComplete="current-password"
       />
+      {isError && <div>Something went wrong</div>}
       <button type="submit" onClick={handleSubmit}>
         Sign in
       </button>

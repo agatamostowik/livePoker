@@ -136,17 +136,17 @@ export const GameApi = createApi({
       },
     }),
 
-    startGame: builder.mutation<Game, CreateGamePayload>({
-      query: (payload) => {
-        const { roomId, ...body } = payload;
+    // startGame: builder.mutation<Game, CreateGamePayload>({
+    //   query: (payload) => {
+    //     const { roomId, ...body } = payload;
 
-        return {
-          url: `/api/rooms/${roomId}/start-game`,
-          method: "POST",
-          body: body,
-        };
-      },
-    }),
+    //     return {
+    //       url: `/api/rooms/${roomId}/start-game`,
+    //       method: "POST",
+    //       body: body,
+    //     };
+    //   },
+    // }),
 
     makePlayerBets: builder.mutation<any, MakeBetsPayload>({
       query: (payload) => {

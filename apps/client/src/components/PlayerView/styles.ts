@@ -62,6 +62,18 @@ export const ChipsContainer = styled.div`
   justify-content: center;
   align-items: center;
   gap: 15px;
+  z-index: 1;
+`;
+
+export const PlayOrPassContainer = styled.div`
+  display: flex;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  z-index: 1;
 `;
 
 export const Chip = styled.button`
@@ -103,6 +115,7 @@ export const Buttons = styled.div`
   position: absolute;
   bottom: 10px;
   gap: 20px;
+  z-index: 1;
 `;
 
 export const AAButton = styled.div`
@@ -120,6 +133,18 @@ export const AAButton = styled.div`
 
 export const AnteButton = styled.div`
   cursor: pointer;
+  border: 5px solid #ffffff;
+  border-radius: 10px;
+  width: 200px;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ffffff;
+  font-size: 30px;
+`;
+
+export const PlayButton = styled.div`
   border: 5px solid #ffffff;
   border-radius: 10px;
   width: 200px;

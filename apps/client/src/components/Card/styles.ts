@@ -3,103 +3,104 @@ import styled, { css } from "styled-components";
 export type Color = "spades" | "clubs" | "hearts" | "diamonds";
 
 export type Rank =
-  | "rank1"
-  | "rank2"
-  | "rank3"
-  | "rank4"
-  | "rank5"
-  | "rank6"
-  | "rank7"
-  | "rank8"
-  | "rank9"
-  | "rank10"
-  | "rank11"
-  | "rank12"
-  | "rank13";
+  | "2"
+  | "3"
+  | "4"
+  | "5"
+  | "6"
+  | "7"
+  | "8"
+  | "9"
+  | "T"
+  | "J"
+  | "Q"
+  | "K"
+  | "A";
+
+type Side = "face" | "back";
 
 type CardProps = {
-  face?: boolean;
-  back?: boolean;
+  side: Side;
   color?: Color;
   rank?: Rank;
 };
 
 const values = {
-  rank1: "A",
-  rank2: "2",
-  rank3: "3",
-  rank4: "4",
-  rank5: "5",
-  rank6: "6",
-  rank7: "7",
-  rank8: "8",
-  rank9: "9",
-  rank10: "10",
-  rank11: "J",
-  rank12: "Q",
-  rank13: "K",
+  2: "2",
+  3: "3",
+  4: "4",
+  5: "5",
+  6: "6",
+  7: "7",
+  8: "8",
+  9: "9",
+  T: "10",
+  J: "J",
+  Q: "Q",
+  K: "K",
+  A: "A",
 };
 
 const urls = {
-  spades: {
-    rank1: new URL(`/src/assets/spades_rank1.svg`, import.meta.url).href,
-    rank2: new URL(`/src/assets/spades_rank2.svg`, import.meta.url).href,
-    rank3: new URL(`/src/assets/spades_rank3.svg`, import.meta.url).href,
-    rank4: new URL(`/src/assets/spades_rank4.svg`, import.meta.url).href,
-    rank5: new URL(`/src/assets/spades_rank5.svg`, import.meta.url).href,
-    rank6: new URL(`/src/assets/spades_rank6.svg`, import.meta.url).href,
-    rank7: new URL(`/src/assets/spades_rank7.svg`, import.meta.url).href,
-    rank8: new URL(`/src/assets/spades_rank8.svg`, import.meta.url).href,
-    rank9: new URL(`/src/assets/spades_rank9.svg`, import.meta.url).href,
-    rank10: new URL(`/src/assets/spades_rank10.svg`, import.meta.url).href,
-    rank11: new URL(`/src/assets/spades_rank11.svg`, import.meta.url).href,
-    rank12: new URL(`/src/assets/spades_rank12.svg`, import.meta.url).href,
-    rank13: new URL(`/src/assets/spades_rank13.svg`, import.meta.url).href,
+  s: {
+    "2": new URL(`/src/assets/2_s.svg`, import.meta.url).href,
+    "3": new URL(`/src/assets/3_s.svg`, import.meta.url).href,
+    "4": new URL(`/src/assets/4_s.svg`, import.meta.url).href,
+    "5": new URL(`/src/assets/5_s.svg`, import.meta.url).href,
+    "6": new URL(`/src/assets/6_s.svg`, import.meta.url).href,
+    "7": new URL(`/src/assets/7_s.svg`, import.meta.url).href,
+    "8": new URL(`/src/assets/8_s.svg`, import.meta.url).href,
+    "9": new URL(`/src/assets/9_s.svg`, import.meta.url).href,
+    T: new URL(`/src/assets/T_s.svg`, import.meta.url).href,
+    J: new URL(`/src/assets/J_s.svg`, import.meta.url).href,
+    Q: new URL(`/src/assets/Q_s.svg`, import.meta.url).href,
+    K: new URL(`/src/assets/K_s.svg`, import.meta.url).href,
+    A: new URL(`/src/assets/A_s.svg`, import.meta.url).href,
   },
-  hearts: {
-    rank1: new URL(`/src/assets/hearts_rank1.svg`, import.meta.url).href,
-    rank2: new URL(`/src/assets/hearts_rank2.svg`, import.meta.url).href,
-    rank3: new URL(`/src/assets/hearts_rank3.svg`, import.meta.url).href,
-    rank4: new URL(`/src/assets/hearts_rank4.svg`, import.meta.url).href,
-    rank5: new URL(`/src/assets/hearts_rank5.svg`, import.meta.url).href,
-    rank6: new URL(`/src/assets/hearts_rank6.svg`, import.meta.url).href,
-    rank7: new URL(`/src/assets/hearts_rank7.svg`, import.meta.url).href,
-    rank8: new URL(`/src/assets/hearts_rank8.svg`, import.meta.url).href,
-    rank9: new URL(`/src/assets/hearts_rank9.svg`, import.meta.url).href,
-    rank10: new URL(`/src/assets/hearts_rank10.svg`, import.meta.url).href,
-    rank11: new URL(`/src/assets/hearts_rank11.svg`, import.meta.url).href,
-    rank12: new URL(`/src/assets/hearts_rank12.svg`, import.meta.url).href,
-    rank13: new URL(`/src/assets/hearts_rank13.svg`, import.meta.url).href,
+  h: {
+    "2": new URL(`/src/assets/2_h.svg`, import.meta.url).href,
+    "3": new URL(`/src/assets/3_h.svg`, import.meta.url).href,
+    "4": new URL(`/src/assets/4_h.svg`, import.meta.url).href,
+    "5": new URL(`/src/assets/5_h.svg`, import.meta.url).href,
+    "6": new URL(`/src/assets/6_h.svg`, import.meta.url).href,
+    "7": new URL(`/src/assets/7_h.svg`, import.meta.url).href,
+    "8": new URL(`/src/assets/8_h.svg`, import.meta.url).href,
+    "9": new URL(`/src/assets/9_h.svg`, import.meta.url).href,
+    T: new URL(`/src/assets/T_h.svg`, import.meta.url).href,
+    J: new URL(`/src/assets/J_h.svg`, import.meta.url).href,
+    Q: new URL(`/src/assets/Q_h.svg`, import.meta.url).href,
+    K: new URL(`/src/assets/K_h.svg`, import.meta.url).href,
+    A: new URL(`/src/assets/A_h.svg`, import.meta.url).href,
   },
-  clubs: {
-    rank1: new URL(`/src/assets/clubs_rank1.svg`, import.meta.url).href,
-    rank2: new URL(`/src/assets/clubs_rank2.svg`, import.meta.url).href,
-    rank3: new URL(`/src/assets/clubs_rank3.svg`, import.meta.url).href,
-    rank4: new URL(`/src/assets/clubs_rank4.svg`, import.meta.url).href,
-    rank5: new URL(`/src/assets/clubs_rank5.svg`, import.meta.url).href,
-    rank6: new URL(`/src/assets/clubs_rank6.svg`, import.meta.url).href,
-    rank7: new URL(`/src/assets/clubs_rank7.svg`, import.meta.url).href,
-    rank8: new URL(`/src/assets/clubs_rank8.svg`, import.meta.url).href,
-    rank9: new URL(`/src/assets/clubs_rank9.svg`, import.meta.url).href,
-    rank10: new URL(`/src/assets/clubs_rank10.svg`, import.meta.url).href,
-    rank11: new URL(`/src/assets/clubs_rank11.svg`, import.meta.url).href,
-    rank12: new URL(`/src/assets/clubs_rank12.svg`, import.meta.url).href,
-    rank13: new URL(`/src/assets/clubs_rank13.svg`, import.meta.url).href,
+  c: {
+    2: new URL(`/src/assets/2_c.svg`, import.meta.url).href,
+    3: new URL(`/src/assets/3_c.svg`, import.meta.url).href,
+    4: new URL(`/src/assets/4_c.svg`, import.meta.url).href,
+    5: new URL(`/src/assets/5_c.svg`, import.meta.url).href,
+    6: new URL(`/src/assets/6_c.svg`, import.meta.url).href,
+    7: new URL(`/src/assets/7_c.svg`, import.meta.url).href,
+    8: new URL(`/src/assets/8_c.svg`, import.meta.url).href,
+    9: new URL(`/src/assets/9_c.svg`, import.meta.url).href,
+    T: new URL(`/src/assets/T_c.svg`, import.meta.url).href,
+    J: new URL(`/src/assets/J_c.svg`, import.meta.url).href,
+    Q: new URL(`/src/assets/Q_c.svg`, import.meta.url).href,
+    K: new URL(`/src/assets/K_c.svg`, import.meta.url).href,
+    A: new URL(`/src/assets/A_c.svg`, import.meta.url).href,
   },
-  diamonds: {
-    rank1: new URL(`/src/assets/diamonds_rank1.svg`, import.meta.url).href,
-    rank2: new URL(`/src/assets/diamonds_rank2.svg`, import.meta.url).href,
-    rank3: new URL(`/src/assets/diamonds_rank3.svg`, import.meta.url).href,
-    rank4: new URL(`/src/assets/diamonds_rank4.svg`, import.meta.url).href,
-    rank5: new URL(`/src/assets/diamonds_rank5.svg`, import.meta.url).href,
-    rank6: new URL(`/src/assets/diamonds_rank6.svg`, import.meta.url).href,
-    rank7: new URL(`/src/assets/diamonds_rank7.svg`, import.meta.url).href,
-    rank8: new URL(`/src/assets/diamonds_rank8.svg`, import.meta.url).href,
-    rank9: new URL(`/src/assets/diamonds_rank9.svg`, import.meta.url).href,
-    rank10: new URL(`/src/assets/diamonds_rank10.svg`, import.meta.url).href,
-    rank11: new URL(`/src/assets/diamonds_rank11.svg`, import.meta.url).href,
-    rank12: new URL(`/src/assets/diamonds_rank12.svg`, import.meta.url).href,
-    rank13: new URL(`/src/assets/diamonds_rank13.svg`, import.meta.url).href,
+  d: {
+    "2": new URL(`/src/assets/2_d.svg`, import.meta.url).href,
+    "3": new URL(`/src/assets/3_d.svg`, import.meta.url).href,
+    "4": new URL(`/src/assets/4_d.svg`, import.meta.url).href,
+    "5": new URL(`/src/assets/5_d.svg`, import.meta.url).href,
+    "6": new URL(`/src/assets/6_d.svg`, import.meta.url).href,
+    "7": new URL(`/src/assets/7_d.svg`, import.meta.url).href,
+    "8": new URL(`/src/assets/8_d.svg`, import.meta.url).href,
+    "9": new URL(`/src/assets/9_d.svg`, import.meta.url).href,
+    T: new URL(`/src/assets/T_d.svg`, import.meta.url).href,
+    J: new URL(`/src/assets/J_d.svg`, import.meta.url).href,
+    Q: new URL(`/src/assets/Q_d.svg`, import.meta.url).href,
+    K: new URL(`/src/assets/K_d.svg`, import.meta.url).href,
+    A: new URL(`/src/assets/A_d.svg`, import.meta.url).href,
   },
 };
 
@@ -140,7 +141,7 @@ export const Card = styled.div<CardProps>`
   }
 
   ${(props) => {
-    if (props.back) {
+    if (props.side === "back") {
       return css`
         background-image: ${`url("${
           new URL(`/src/assets/back.png`, import.meta.url).href
@@ -153,7 +154,7 @@ export const Card = styled.div<CardProps>`
   }}
 
   ${(props) => {
-    if (props.face) {
+    if (props.side === "face") {
       return css`
         background-position: 50% 50%;
         background-size: 100% 100%;
@@ -163,7 +164,10 @@ export const Card = styled.div<CardProps>`
   }}
 
   ${(props) => {
-    if ((props.face && props.color === "spades") || props.color === "clubs") {
+    if (
+      (props.side === "face" && props.color === "spades") ||
+      props.color === "clubs"
+    ) {
       return css`
         color: #000;
       `;
@@ -172,7 +176,7 @@ export const Card = styled.div<CardProps>`
 
   ${(props) => {
     if (
-      (props.face && props.color === "hearts") ||
+      (props.side === "face" && props.color === "hearts") ||
       props.color === "diamonds"
     ) {
       return css`
@@ -182,7 +186,7 @@ export const Card = styled.div<CardProps>`
   }}
 
   ${(props) => {
-    if (props.face && props.color && props.rank) {
+    if (props.side === "face" && props.color && props.rank) {
       return css`
         background-image: url(${urls[props.color][props.rank]});
         background-size: contain;
@@ -191,7 +195,7 @@ export const Card = styled.div<CardProps>`
   }}
   
   ${(props) => {
-    if (props.face && props.rank) {
+    if (props.side === "face" && props.rank) {
       return css`
         &:after,
         &:before {

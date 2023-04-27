@@ -4,7 +4,7 @@ import { supabase } from "../db";
 
 export const makeRoundBetsController = async (req: Request, res: Response) => {
   try {
-    console.log(req.body);
+    // console.log(req.body);
     // const { data, error } = await supabase
     //   .from("rounds")
     //   .update({

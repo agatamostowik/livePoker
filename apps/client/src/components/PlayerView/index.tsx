@@ -1,6 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import { skipToken } from "@reduxjs/toolkit/dist/query";
-import { useParams } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Peer } from "peerjs";
 import _ from "lodash";
 import { GameApi } from "../../redux/RTK";
@@ -9,11 +7,6 @@ import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { setMediaStream, setVideoIsPlaying } from "../../redux/slices/app";
 import * as Styled from "./styles";
 import { Cards } from "../Cards";
-import {
-  useGetGameByRoomIdOnMount,
-  useGetRoomOnMount,
-  useGetRoundByGameIdOnMount,
-} from "../../hooks";
 import { Video } from "../Video";
 
 const useWebRTC = () => {
@@ -64,7 +57,6 @@ const useWebRTC = () => {
       call.answer();
 
       call.on("iceStateChanged", (iceState) => {
-        console.log(iceState);
         if (iceState === "disconnected") {
           dispatch(setMediaStream(null));
           peer.connect("dealer");
@@ -80,7 +72,6 @@ const useWebRTC = () => {
       });
 
       call.on("stream", (remoteStream) => {
-        console.log(remoteStream);
         dispatch(setMediaStream(remoteStream));
       });
     });
@@ -90,14 +81,8 @@ const useWebRTC = () => {
 const Buttons = (props: any) => {
   const { bet, temporaryBalance, AABetSum, anteBetSum } = props;
 
-  const { roomId } = useParams();
-  const { data: room } = GameApi.endpoints.getRoomById.useQuery(roomId!);
-  const { data: game } = GameApi.endpoints.getGameByRoomId.useQuery(
-    room ? room.id : skipToken
-  );
-  const { data: round } = GameApi.endpoints.getRoundByGameId.useQuery(
-    game ? game.id : skipToken
-  );
+  const game = useAppSelector((state) => state.game.data);
+  const round = useAppSelector((state) => state.round.data);
 
   const makeAnteBet = () => {
     if (bet) {
@@ -141,7 +126,12 @@ const Buttons = (props: any) => {
           <Styled.PlacedBetChip>{anteBetSum}</Styled.PlacedBetChip>
         )}
       </Styled.AnteButton>
-      <Styled.AnteButton>Play</Styled.AnteButton>
+      <Styled.PlayButton>
+        Play
+        {round?.play_bet && (
+          <Styled.PlacedBetChip>{round.play_bet}</Styled.PlacedBetChip>
+        )}
+      </Styled.PlayButton>
     </Styled.Buttons>
   );
 };
@@ -175,21 +165,35 @@ const Bets = (props: any) => {
   );
 };
 
+const PlayOrPass = () => {
+  const round = useAppSelector((state) => state.round.data);
+
+  const handlePlay = () => {
+    webSocketClient.emit("playBet", {
+      roundId: round?.id,
+    });
+  };
+
+  return (
+    <Styled.PlayOrPassContainer>
+      <div>MAKE YOUR DECISION</div>
+      <div>
+        <button onClick={handlePlay}>PLAY x2</button>
+        <button>FOLD</button>
+      </div>
+    </Styled.PlayOrPassContainer>
+  );
+};
+
 const Game = () => {
-  const { roomId } = useParams();
-  const { data: room } = GameApi.endpoints.getRoomById.useQuery(roomId!);
-  const { data: game } = GameApi.endpoints.getGameByRoomId.useQuery(
-    room ? room.id : skipToken
-  );
-  const { data: round } = GameApi.endpoints.getRoundByGameId.useQuery(
-    game ? game.id : skipToken
-  );
+  const room = useAppSelector((state) => state.room.data);
+  const game = useAppSelector((state) => state.game.data);
+  const round = useAppSelector((state) => state.round.data);
   const user = useAppSelector((state) => state.app.user);
   const { data: account } = GameApi.endpoints.getUserAccount.useQuery(
     user?.id!
   );
-
-  const [bet, setBet] = useState<number>();
+  const [bet, setBet] = useState<number>(1);
 
   const handleStartGame = () => {
     webSocketClient.emit("startGame", {
@@ -203,6 +207,18 @@ const Game = () => {
   const anteBetSum = _.sum(round?.ante_bet);
   const temporaryBalance = account?.balance! - (AABetSum + anteBetSum);
 
+  const sumOfPlayedCards = useMemo(() => {
+    if (round) {
+      return (
+        round?.dealer_cards.length +
+        round?.player_cards.length +
+        round?.common_cards.length
+      );
+    } else {
+      return 0;
+    }
+  }, [round]);
+
   return (
     <Styled.Game>
       <Styled.Board>
@@ -212,9 +228,18 @@ const Game = () => {
           </Styled.JoinGameButton>
         ) : (
           <>
-            <Styled.Balance>{temporaryBalance}</Styled.Balance>
+            {/* <Styled.Balance>{temporaryBalance}</Styled.Balance> */}
+
             {round && round?.bets_over == false && (
-              <Bets temporaryBalance={temporaryBalance} setBet={setBet} />
+              <Bets
+                bet={bet}
+                temporaryBalance={temporaryBalance}
+                setBet={setBet}
+              />
+            )}
+
+            {round && sumOfPlayedCards === 7 && _.isNull(round.play_bet) && (
+              <PlayOrPass />
             )}
 
             <Cards />
@@ -233,9 +258,6 @@ const Game = () => {
 
 export const PlayerView = () => {
   useWebRTC();
-  useGetRoomOnMount();
-  useGetGameByRoomIdOnMount();
-  useGetRoundByGameIdOnMount();
 
   return (
     <Styled.Container>

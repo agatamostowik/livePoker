@@ -1,6 +1,8 @@
 import { Server, Socket } from "socket.io";
 import { supabase } from "../db";
 import _ from "lodash";
+// @ts-ignore
+import pokersolver from "pokersolver";
 
 function drawCard(initialCards: string[]) {
   const drawnCard =
@@ -40,22 +42,7 @@ export const webSocket = (httpServer: any) => {
     socket.on("createRoom", async (params) => {
       const { data, error } = await supabase
         .from("rooms")
-        .insert([{ name: params.name, dealer_id: params.dealer_id }])
-        .select("*");
-
-      if (data) {
-        socket.emit("roomCreated");
-        socket.broadcast.emit("roomCreated");
-      }
-    });
-
-    socket.on("updateRoom", async (params) => {
-      const { data, error } = await supabase
-        .from("rooms")
-        .update({
-          stream_address: params.streamAddress,
-        })
-        .eq("id", params.roomId)
+        .insert([{ name: params.name, dealer_id: params.dealerId }])
         .select("*");
 
       if (error) {
@@ -63,10 +50,8 @@ export const webSocket = (httpServer: any) => {
       }
 
       if (data) {
-        const roomId = data[0].id;
-
-        socket.emit("roomUpdated", roomId);
-        socket.broadcast.emit("roomUpdated", roomId);
+        socket.emit("roomCreated", data[0]);
+        socket.broadcast.emit("roomCreated", data[0]);
       }
     });
 
@@ -88,8 +73,8 @@ export const webSocket = (httpServer: any) => {
       }
 
       if (data) {
-        socket.emit("gameStarted", params.roomId);
-        socket.broadcast.emit("gameStarted", params.roomId);
+        socket.emit("gameStarted", data[0]);
+        socket.broadcast.emit("gameStarted", data[0]);
       }
     });
 
@@ -110,8 +95,8 @@ export const webSocket = (httpServer: any) => {
       }
 
       if (data) {
-        socket.emit("bettingStarted", params.gameId);
-        socket.broadcast.emit("bettingStarted", params.gameId);
+        socket.emit("bettingStarted", data[0]);
+        socket.broadcast.emit("bettingStarted", data[0]);
       }
     });
 
@@ -120,14 +105,14 @@ export const webSocket = (httpServer: any) => {
       async (params: { roundId: string; gameId: string; anteBet: number }) => {
         const { roundId, gameId, anteBet } = params;
 
-        const { data: previousValues } = await supabase
+        const { data: initialRound } = await supabase
           .from("rounds")
           .select("ante_bet")
           .eq("id", roundId);
 
-        const ante_bet = previousValues?.[0].ante_bet;
+        const ante_bet = initialRound?.[0].ante_bet;
 
-        const { data, error } = await supabase
+        const { data: updatedRound, error } = await supabase
           .from("rounds")
           .update({
             ante_bet: [...ante_bet, anteBet],
@@ -139,9 +124,9 @@ export const webSocket = (httpServer: any) => {
           console.error(error);
         }
 
-        if (data) {
-          socket.emit("madeAnteBet", gameId);
-          socket.broadcast.emit("madeAnteBet", gameId);
+        if (updatedRound) {
+          socket.emit("madeAnteBet", updatedRound[0]);
+          socket.broadcast.emit("madeAnteBet", updatedRound[0]);
         }
       }
     );
@@ -184,23 +169,16 @@ export const webSocket = (httpServer: any) => {
           .eq("user_id", playerId);
 
         // update the account balance column by subtracting bets from the account balance value
-        await supabase
+        const { data: updatedAccount } = await supabase
           .from("accounts")
           .update({
             balance: account?.[0].balance - _.sum(round?.[0].ante_bet),
           })
-          .eq("user_id", playerId);
+          .eq("user_id", playerId)
+          .select("*");
 
-        socket.emit("bettingStopped", {
-          roundId: roundId,
-          playerId: playerId,
-          gameId: gameId,
-        });
-        socket.broadcast.emit("bettingStopped", {
-          roundId: roundId,
-          playerId: playerId,
-          gameId: gameId,
-        });
+        socket.emit("bettingStopped", round?.[0]);
+        socket.broadcast.emit("bettingStopped", round?.[0]);
       }
     );
 
@@ -224,28 +202,123 @@ export const webSocket = (httpServer: any) => {
         })
         .eq("id", roundId);
 
-      const X = 0;
       dealer.drawnCards.forEach((card, index) => {
         setTimeout(() => {
           socket.emit(`playDealerCard`, card);
-        }, (X + index) * 600);
+        }, (0 + index) * 600);
       });
 
-      const Z = 2;
       common.drawnCards.forEach((card, index) => {
         setTimeout(() => {
           socket.emit(`playCommonCard`, card);
-        }, (Z + index) * 600);
+        }, (2 + index) * 600);
       });
 
-      const C = 5;
       player.drawnCards.forEach((card, index) => {
         setTimeout(() => {
           socket.emit(`playPlayerCard`, card);
-        }, (C + index) * 600);
+        }, (5 + index) * 600);
       });
+    });
+
+    socket.on("playBet", async (params) => {
+      const { data: initialRoundState } = await supabase
+        .from("rounds")
+        .select("*")
+        .eq("id", params.roundId);
+
+      const anteBet = initialRoundState?.[0].ante_bet;
+      const playBet = _.sum(anteBet) * 2;
+
+      const { data: updatedRound } = await supabase
+        .from("rounds")
+        .update({
+          play_bet: playBet,
+        })
+        .eq("id", params.roundId)
+        .select("*");
+
+      if (updatedRound) {
+        socket.emit("finishedPlayBet", updatedRound[0]);
+        socket.broadcast.emit("finishedPlayBet", updatedRound[0]);
+      }
+    });
+
+    socket.on("playTurnAndRiverCard", async (params) => {
+      const { data: initialRoundState } = await supabase
+        .from("rounds")
+        .select("*")
+        .eq("id", params.roundId);
+
+      const { drawnCards, cards } = drawTwoCards(initialRoundState?.[0].cards);
+
+      await supabase
+        .from("rounds")
+        .update({
+          cards: cards,
+          common_cards: [...initialRoundState?.[0].common_cards, ...drawnCards],
+        })
+        .eq("id", params.roundId)
+        .select("*");
+
+      drawnCards.forEach((card, index) => {
+        setTimeout(() => {
+          socket.emit(`playCommonCard`, card);
+        }, (0 + index) * 600);
+      });
+    });
+
+    socket.on("evaluateHands", async (params) => {
+      const Hand = pokersolver.Hand;
+
+      const { data: round } = await supabase
+        .from("rounds")
+        .select("*")
+        .eq("id", params.roundId);
+
+      const dealerCards = merge(round?.[0].dealer_cards);
+      const commonCards = merge(round?.[0].common_cards);
+      const playerCards = merge(round?.[0].player_cards);
+
+      const playerCommon = [...playerCards, ...commonCards];
+      const dealerCommon = [...dealerCards, ...commonCards];
+
+      const playerHand = Hand.solve(playerCommon);
+      const dealerHand = Hand.solve(dealerCommon);
+      playerHand.role = "player";
+      dealerHand.role = "dealer";
+
+      const winnerHand = Hand.winners([playerHand, dealerHand]);
+
+      //    // Dealer doesn't qualify
+      // if (dealerRank === 0 || dealerRank === 1 && ) {
+      //   // return Score.DEALER_NOT_QUALIFY;
+      //   // return player.anteBet * 2;
+      // }
+
+      // if (winnerHand.length === 2) {
+      //   // return player.anteBet * 2 + player.callBet;
+      // }
+
+      // Player wins
+      // if (winnerHand[0].role === "player") {
+      //   // return Score.PLAYER_WIN;
+      //   // return player.anteBet * 2 + player.callBet * 2;
+      // }
+
+      // Dealer wins
+      // if (winnerHand[0].role === "dealer") {
+      //   // return Score.DEALER_WIN;
+      //   // return 0;
+      // }
     });
   });
 
   return io;
 };
+
+function merge(cards: string[]) {
+  return cards.map((card) => {
+    return card.replace("_", "");
+  });
+}

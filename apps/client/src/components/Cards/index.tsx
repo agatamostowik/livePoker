@@ -3,35 +3,44 @@ import { Card, Color, Rank } from "../Card/styles";
 import * as Styled from "./styles";
 
 export const Cards = () => {
-  const round = useAppSelector((state) => state.app.round);
+  const round = useAppSelector((state) => state.round.data);
+
+  const isVisible = round?.common_cards.length === 5;
 
   return (
     <Styled.Container>
       <Styled.Cards>
-        {round?.dealer_cards.map((card) => {
+        {round?.dealer_cards.map((card, index) => {
           const colorRank = card.split("_");
-          const color = colorRank[0] as Color;
-          const rank = colorRank[1] as Rank;
+          const rank = colorRank[0] as Rank;
+          const color = colorRank[1] as Color;
 
-          return <Card back color={color} rank={rank} />;
+          return (
+            <Card
+              key={index}
+              side={isVisible ? "face" : "back"}
+              color={color}
+              rank={rank}
+            />
+          );
         })}
       </Styled.Cards>
       <Styled.Cards>
-        {round?.common_cards.map((card) => {
+        {round?.common_cards.map((card, index) => {
           const colorRank = card.split("_");
-          const color = colorRank[0] as Color;
-          const rank = colorRank[1] as Rank;
+          const rank = colorRank[0] as Rank;
+          const color = colorRank[1] as Color;
 
-          return <Card face color={color} rank={rank} />;
+          return <Card key={index} side="face" color={color} rank={rank} />;
         })}
       </Styled.Cards>
       <Styled.Cards>
-        {round?.player_cards.map((card) => {
+        {round?.player_cards.map((card, index) => {
           const colorRank = card.split("_");
-          const color = colorRank[0] as Color;
-          const rank = colorRank[1] as Rank;
+          const rank = colorRank[0] as Rank;
+          const color = colorRank[1] as Color;
 
-          return <Card face color={color} rank={rank} />;
+          return <Card key={index} side="face" color={color} rank={rank} />;
         })}
       </Styled.Cards>
     </Styled.Container>

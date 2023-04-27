@@ -4,8 +4,6 @@ import bodyParser from "body-parser";
 import { createServer } from "http";
 import { rootRouter } from "./routes";
 
-import { ExpressPeerServer } from "peer";
-
 export const initApp = () => {
   // Create Express application instance
   const app = express();

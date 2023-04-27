@@ -1,5 +1,4 @@
 import { ChangeEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import _ from "lodash";
 import { GameApi } from "../../redux/RTK";
 import { useAppSelector } from "../../redux/store";
@@ -18,7 +17,7 @@ export const CreateRoomModal = () => {
   const handleCreateRoom = async () => {
     webSocketClient.emit("createRoom", {
       name: name,
-      dealer_id: user?.id,
+      dealerId: user?.id,
     });
 
     setIsModalOpen(false);

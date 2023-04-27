@@ -1,19 +1,45 @@
-import { useParams } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../redux/store";
-import { Game, Round, setGame, setRoom, setRound } from "../redux/slices/app";
+import _ from "lodash";
 import { useEffect } from "react";
-import { Room } from "../redux/RTK";
+import { useNavigate, useParams } from "react-router-dom";
+import { useAppDispatch } from "../redux/store";
+import { Game, setGame } from "../redux/slices/game";
+import { Room, setRoom } from "../redux/slices/room";
+import { Round, setRound } from "../redux/slices/round";
+import { setError, setIsRoomsLoading, setRooms } from "../redux/slices/rooms";
+import {
+  Account,
+  setAccount,
+  setIsAuthenticated,
+  setIsLoading,
+  setUser,
+} from "../redux/slices/auth";
+import { supabase } from "../db";
 
-export const useGetRoomOnMount = () => {
+export const useGetInitalDataOnMount = () => {
   const { roomId } = useParams();
   const dispatch = useAppDispatch();
 
-  const getRoom = async () => {
+  const getData = async () => {
     try {
       const response = await fetch(`http://localhost:3001/api/rooms/${roomId}`);
       const room: Room = await response.json();
-
       dispatch(setRoom(room));
+
+      if (room?.id) {
+        const response = await fetch(
+          `http://localhost:3001/api/games/find?roomId=${room?.id}`
+        );
+        const game: Game = await response.json();
+        dispatch(setGame(game));
+
+        if (game?.id) {
+          const response = await fetch(
+            `http://localhost:3001/api/rounds/find?gameId=${game?.id}`
+          );
+          const round: Round = await response.json();
+          dispatch(setRound(round));
+        }
+      }
     } catch (error) {
       console.error(error);
     }
@@ -21,58 +47,55 @@ export const useGetRoomOnMount = () => {
 
   useEffect(() => {
     if (roomId) {
-      getRoom();
+      getData();
     }
   }, []);
 };
 
-export const useGetGameByRoomIdOnMount = () => {
+export const useGetRooms = () => {
   const dispatch = useAppDispatch();
-  const room = useAppSelector((state) => state.app.room);
-  const game = useAppSelector((state) => state.app.game);
 
-  const getGame = async () => {
+  const getRooms = async () => {
+    dispatch(setIsRoomsLoading(true));
     try {
-      const response = await fetch(
-        `http://localhost:3001/api/games/find?roomId=${room.id}`
-      );
-      const game: Game = await response.json();
+      const response = await fetch(`http://localhost:3001/api/rooms`);
+      const room: Room[] = await response.json();
 
-      dispatch(setGame(game));
+      dispatch(setRooms(room));
     } catch (error) {
-      console.error(error);
+      dispatch(setError(error as Error));
     }
+    dispatch(setIsRoomsLoading(false));
   };
 
   useEffect(() => {
-    if (!game) {
-      getGame();
-    }
-  }, [room, game]);
+    getRooms();
+  }, []);
 };
 
-export const useGetRoundByGameIdOnMount = () => {
+export const getUserAccount = () => {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const room = useAppSelector((state) => state.app.room);
-  const game = useAppSelector((state) => state.app.game);
-  const round = useAppSelector((state) => state.app.round);
 
-  const getRound = async () => {
-    try {
+  const authenticate = async () => {
+    dispatch(setIsLoading(true));
+    const { data } = await supabase.auth.getUser();
+
+    if (data.user) {
       const response = await fetch(
-        `http://localhost:3001/api/rounds/find?gameId=${game?.id}`
+        `http://localhost:3001/api/auth/me?userId=${data.user.id}`
       );
-      const round: Round = await response.json();
+      const account: Account = await response.json();
 
-      dispatch(setRound(round));
-    } catch (error) {
-      console.error(error);
+      dispatch(setUser(data.user));
+      dispatch(setAccount(account));
+      dispatch(setIsAuthenticated(true));
+      dispatch(setIsLoading(false));
+      navigate("/rooms");
     }
   };
 
   useEffect(() => {
-    if (!round && room && game) {
-      getRound();
-    }
-  }, [round, game]);
+    authenticate();
+  }, []);
 };

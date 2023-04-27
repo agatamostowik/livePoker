@@ -92,6 +92,18 @@ export const AnteButton = styled.div`
   font-size: 30px;
 `;
 
+export const PlayButton = styled.div`
+  border: 5px solid #ffffff;
+  border-radius: 10px;
+  width: 200px;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ffffff;
+  font-size: 30px;
+`;
+
 export const Test = styled.div`
   width: 100%;
   max-height: 100vh;
