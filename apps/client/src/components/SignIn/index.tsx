@@ -2,7 +2,15 @@ import { ChangeEvent, MouseEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../redux/store";
 import { supabase } from "../../db";
-import { setUser } from "../../redux/slices/auth";
+import {
+  Account,
+  setAccount,
+  setIsAuthenticated,
+  setUser,
+} from "../../redux/slices/auth";
+
+import * as Styled from "./styles";
+import { Input } from "../Input/Input";
 
 export const Signin = () => {
   const dispatch = useAppDispatch();
@@ -35,8 +43,15 @@ export const Signin = () => {
       const { data } = await signInWithEmail(email, password);
 
       if (data.user) {
+        const response = await fetch(
+          `http://localhost:3001/api/auth/me?userId=${data.user.id}`
+        );
+        const account: Account = await response.json();
+
         setIsError(false);
         dispatch(setUser(data.user));
+        dispatch(setAccount(account));
+        dispatch(setIsAuthenticated(true));
         navigate("/rooms");
       }
     } catch (error) {
@@ -45,23 +60,35 @@ export const Signin = () => {
   };
 
   return (
-    <div>
-      <input
-        type="email"
-        value={email}
-        onChange={handleEmail}
-        autoFocus={true}
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={handlePassword}
-        autoComplete="current-password"
-      />
-      {isError && <div>Something went wrong</div>}
-      <button type="submit" onClick={handleSubmit}>
-        Sign in
-      </button>
-    </div>
+    <Styled.Background>
+      <Styled.Container>
+        <Styled.InputContainer>
+          <Styled.Label>Email</Styled.Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={handleEmail}
+            autoFocus={true}
+          />
+        </Styled.InputContainer>
+        <Styled.InputContainer>
+          <Styled.Label> Password </Styled.Label>
+
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={handlePassword}
+            autoComplete="current-password"
+          />
+        </Styled.InputContainer>
+        {isError && <div>Something went wrong</div>}
+
+        <Styled.Button type="submit" onClick={handleSubmit}>
+          Sign in
+        </Styled.Button>
+      </Styled.Container>
+    </Styled.Background>
   );
 };

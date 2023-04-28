@@ -1,14 +1,14 @@
 import _ from "lodash";
-import { CreateRoomModal } from "../CreateRoomModal";
 import { Topbar } from "../Topbar";
 import { Table } from "../Table";
+import * as Styled from "./styles";
 
 export const Rooms = () => {
   return (
-    <>
+    <Styled.Background>
       <Topbar />
+
       <Table />
-      <CreateRoomModal />
-    </>
+    </Styled.Background>
   );
 };

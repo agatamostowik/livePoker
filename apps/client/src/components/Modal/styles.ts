@@ -9,19 +9,21 @@ export const Background = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.8);
   z-index: 2;
 `;
 
 export const Dialog = styled.div`
-  background-color: #ffffff;
+  background-color: #181615;
   position: relative;
   padding: 3rem;
-  z-index: 2;
   max-width: 90%;
-  border-radius: 20px;
+  min-width: 30%;
+  border-radius: 10px;
   overflow: scroll;
   z-index: 3;
+  color: #f2f3f3;
+  border: 1px solid #f2f3f338;
   &::-webkit-scrollbar {
     display: none;
   }

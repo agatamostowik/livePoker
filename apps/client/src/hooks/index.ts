@@ -90,9 +90,10 @@ export const getUserAccount = () => {
       dispatch(setUser(data.user));
       dispatch(setAccount(account));
       dispatch(setIsAuthenticated(true));
-      dispatch(setIsLoading(false));
       navigate("/rooms");
     }
+
+    dispatch(setIsLoading(false));
   };
 
   useEffect(() => {

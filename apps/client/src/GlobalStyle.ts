@@ -5,6 +5,8 @@ export const GlobalStyle = createGlobalStyle`
     height: 100vh;
     max-height: 100vh;
     width: 100%;
+    font-family: 'Poppins', sans-serif;
+    font-weight:300;
   }
 
   ul, li {

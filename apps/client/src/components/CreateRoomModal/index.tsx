@@ -5,6 +5,9 @@ import { useAppSelector } from "../../redux/store";
 import { webSocketClient } from "../../webSocket";
 import { Modal } from "../Modal";
 import { skipToken } from "@reduxjs/toolkit/dist/query";
+import * as Styled from "./styles";
+import { Button } from "../Button";
+import { Input } from "../Input/Input";
 
 export const CreateRoomModal = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -39,20 +42,21 @@ export const CreateRoomModal = () => {
 
   return (
     <>
-      <button onClick={handleOpenModal} disabled={isPlayer}>
+      <Button onClick={handleOpenModal} disabled={isPlayer}>
         Create room
-      </button>
+      </Button>
       {isModalOpen && (
         <Modal onClose={handleCloseModal}>
-          <div>
-            <div>
-              <label>Room name:</label>
-              <input type="text" value={name} onChange={handleNameChange} />
-            </div>
-
-            <button onClick={handleCloseModal}>Cancel</button>
-            <button onClick={handleCreateRoom}>Create Room</button>
-          </div>
+          <Styled.Container>
+            <Styled.Input>
+              <Styled.Label>Room name:</Styled.Label>
+              <Input type="text" value={name} onChange={handleNameChange} />
+            </Styled.Input>
+            <Styled.ButtonsContainer>
+              <Button onClick={handleCloseModal}>Cancel</Button>
+              <Button onClick={handleCreateRoom}>Create Room</Button>
+            </Styled.ButtonsContainer>
+          </Styled.Container>
         </Modal>
       )}
     </>

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../redux/store";
 import { SignOut } from "../SignOut";
 import * as Styles from "./styles";
+import { Button } from "../Button";
 
 export const Topbar = () => {
   const navigate = useNavigate();
@@ -14,14 +15,12 @@ export const Topbar = () => {
 
   return (
     <Styles.Container>
-      {user && (
-        <div>
-          <div>{user.email}</div>
-        </div>
-      )}
-      <button disabled={!_.isNull(user)} onClick={handleSignIn}>
-        Login
-      </button>
+      {user && <Styles.Username>{user.email}</Styles.Username>}
+      <Styles.Button>
+        <Button disabled={!_.isNull(user)} onClick={handleSignIn}>
+          Login
+        </Button>
+      </Styles.Button>
       <SignOut />
     </Styles.Container>
   );
