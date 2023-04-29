@@ -11,7 +11,8 @@ export const Background = styled.div`
   height: 100vh;
   background-color: black;
   background-image: url(${url});
-  /* filter: brightness(50%); */
   background-size: cover;
   background-position: center;
+  display: flex;
+  flex-direction: column;
 `;

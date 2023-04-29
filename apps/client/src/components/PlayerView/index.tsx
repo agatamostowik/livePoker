@@ -8,6 +8,7 @@ import { setMediaStream, setVideoIsPlaying } from "../../redux/slices/app";
 import * as Styled from "./styles";
 import { Cards } from "../Cards";
 import { Video } from "../Video";
+import { Chip } from "../Chip";
 
 const useWebRTC = () => {
   const dispatch = useAppDispatch();
@@ -114,24 +115,24 @@ const Buttons = (props: any) => {
 
   return (
     <Styled.Buttons>
-      <Styled.AAButton onClick={makeAABet}>
+      <Styled.Tray onClick={makeAABet}>
         AA
         {AABetSum > 0 && (
           <Styled.PlacedBetChip>{AABetSum}</Styled.PlacedBetChip>
         )}
-      </Styled.AAButton>
-      <Styled.AnteButton onClick={makeAnteBet}>
+      </Styled.Tray>
+      <Styled.Tray onClick={makeAnteBet}>
         ANTE
         {anteBetSum > 0 && (
           <Styled.PlacedBetChip>{anteBetSum}</Styled.PlacedBetChip>
         )}
-      </Styled.AnteButton>
-      <Styled.PlayButton>
+      </Styled.Tray>
+      <Styled.Tray disabled>
         Play
         {round?.play_bet && (
           <Styled.PlacedBetChip>{round.play_bet}</Styled.PlacedBetChip>
         )}
-      </Styled.PlayButton>
+      </Styled.Tray>
     </Styled.Buttons>
   );
 };
@@ -156,7 +157,8 @@ const Bets = (props: any) => {
                 setBet(value);
               }}
             >
-              {value}
+              <Chip />
+              <Styled.ChipValue>{value}</Styled.ChipValue>
             </Styled.Chip>
           </Styled.ActiveChip>
         );
@@ -189,10 +191,9 @@ const Game = () => {
   const room = useAppSelector((state) => state.room.data);
   const game = useAppSelector((state) => state.game.data);
   const round = useAppSelector((state) => state.round.data);
-  const user = useAppSelector((state) => state.app.user);
-  const { data: account } = GameApi.endpoints.getUserAccount.useQuery(
-    user?.id!
-  );
+  const user = useAppSelector((state) => state.auth.user);
+  const account = useAppSelector((state) => state.auth.account);
+
   const [bet, setBet] = useState<number>(1);
 
   const handleStartGame = () => {
@@ -228,8 +229,6 @@ const Game = () => {
           </Styled.JoinGameButton>
         ) : (
           <>
-            {/* <Styled.Balance>{temporaryBalance}</Styled.Balance> */}
-
             {round && round?.bets_over == false && (
               <Bets
                 bet={bet}
@@ -259,12 +258,16 @@ const Game = () => {
 export const PlayerView = () => {
   useWebRTC();
 
+  const mediaStream = useAppSelector((state) => state.app.mediaStream);
+
   return (
     <Styled.Container>
-      <Styled.Test>
-        <Video />
-        <Game />
-      </Styled.Test>
+      {mediaStream && (
+        <Styled.Wrapper>
+          <Video />
+          <Game />
+        </Styled.Wrapper>
+      )}
     </Styled.Container>
   );
 };

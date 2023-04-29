@@ -1,10 +1,8 @@
 import { ChangeEvent, useState } from "react";
 import _ from "lodash";
-import { GameApi } from "../../redux/RTK";
 import { useAppSelector } from "../../redux/store";
 import { webSocketClient } from "../../webSocket";
 import { Modal } from "../Modal";
-import { skipToken } from "@reduxjs/toolkit/dist/query";
 import * as Styled from "./styles";
 import { Button } from "../Button";
 import { Input } from "../Input/Input";
@@ -12,15 +10,16 @@ import { Input } from "../Input/Input";
 export const CreateRoomModal = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [name, setName] = useState("");
-  const user = useAppSelector((state) => state.app.user);
-  const userAccount = GameApi.endpoints.getUserAccount.useQuery(
-    user ? user.id : skipToken
-  );
+  const user = useAppSelector((state) => state.auth.user);
+  const account = useAppSelector((state) => state.auth.account);
 
   const handleCreateRoom = async () => {
-    webSocketClient.emit("createRoom", {
-      name: name,
-      dealerId: user?.id,
+    webSocketClient.emit("MESSAGE", {
+      type: "CREATE_ROOM",
+      payload: {
+        name: name,
+        dealerId: user?.id,
+      },
     });
 
     setIsModalOpen(false);
@@ -38,7 +37,7 @@ export const CreateRoomModal = () => {
     setName(event.target.value);
   };
 
-  const isPlayer = userAccount.data?.role === "player";
+  const isPlayer = account?.role === "player";
 
   return (
     <>

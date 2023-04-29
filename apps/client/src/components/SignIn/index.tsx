@@ -8,9 +8,8 @@ import {
   setIsAuthenticated,
   setUser,
 } from "../../redux/slices/auth";
-
-import * as Styled from "./styles";
 import { Input } from "../Input/Input";
+import * as Styled from "./styles";
 
 export const Signin = () => {
   const dispatch = useAppDispatch();

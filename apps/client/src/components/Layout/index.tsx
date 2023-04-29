@@ -7,9 +7,5 @@ export const Layout = () => {
 
   getUserAccount();
 
-  if (isLoading) {
-    return <div>loading</div>;
-  }
-
   return <Outlet />;
 };

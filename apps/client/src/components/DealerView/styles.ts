@@ -1,13 +1,19 @@
 import styled from "styled-components";
 
 export const Container = styled.div`
+  align-items: center;
+  background-color: #000000;
+  display: flex;
+  height: 100%;
+  justify-content: center;
   position: relative;
   width: 100%;
-  height: 100%;
-  background-color: red;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+`;
+
+export const Wrapper = styled.div`
+  max-height: 100vh;
+  position: relative;
+  width: 100%;
 `;
 
 export const Button = styled.button`
@@ -104,12 +110,6 @@ export const PlayButton = styled.div`
   font-size: 30px;
 `;
 
-export const Test = styled.div`
-  width: 100%;
-  max-height: 100vh;
-  position: relative;
-`;
-
 export const PlacedBetChip = styled.div`
   position: absolute;
   border-radius: 50%;
@@ -122,3 +122,5 @@ export const PlacedBetChip = styled.div`
   justify-content: center;
   align-items: center;
 `;
+
+export const Phase = styled.div<{ success?: boolean }>``;

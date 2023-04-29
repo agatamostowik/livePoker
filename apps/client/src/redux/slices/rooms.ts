@@ -24,7 +24,7 @@ const roomsSlice = createSlice({
     },
 
     appendRoom: (state, action: PayloadAction<Room>) => {
-      state.data.push(action.payload);
+      return { ...state, data: [...state.data, action.payload] };
     },
 
     setIsRoomsLoading: (state, action: PayloadAction<boolean>) => {

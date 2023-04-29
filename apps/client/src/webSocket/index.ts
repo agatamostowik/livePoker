@@ -19,8 +19,20 @@ webSocketClient.on("HANDSHAKE", () => {
   store.dispatch(setIsWebSocketConnected(true));
 });
 
-webSocketClient.on("roomCreated", async (room: Room) => {
-  store.dispatch(appendRoom(room));
+type Message = {
+  type: "ROOM_CREATED";
+  payload: {
+    room: Room;
+  };
+};
+
+webSocketClient.on("MESSAGE", (message: Message) => {
+  switch (message.type) {
+    case "ROOM_CREATED": {
+      store.dispatch(appendRoom(message.payload.room));
+      break;
+    }
+  }
 });
 
 webSocketClient.on("gameStarted", async (game: Game) => {

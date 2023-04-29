@@ -1,6 +1,7 @@
+import _ from "lodash";
 import { Server, Socket } from "socket.io";
 import { supabase } from "../db";
-import _ from "lodash";
+import { createRoom } from "../models";
 // @ts-ignore
 import pokersolver from "pokersolver";
 
@@ -28,6 +29,14 @@ const drawThreeCards = (cards: string[]) => {
   return { drawnCards: [firstCard, secondCard, thirdCard], cards: restCards };
 };
 
+type Message = {
+  type: "CREATE_ROOM";
+  payload: {
+    name: string;
+    dealerId: string;
+  };
+};
+
 export const webSocket = (httpServer: any) => {
   const io = new Server(httpServer, {
     cors: {
@@ -39,19 +48,27 @@ export const webSocket = (httpServer: any) => {
   io.on("connection", (socket: Socket) => {
     socket.emit("HANDSHAKE");
 
-    socket.on("createRoom", async (params) => {
-      const { data, error } = await supabase
-        .from("rooms")
-        .insert([{ name: params.name, dealer_id: params.dealerId }])
-        .select("*");
+    socket.on("MESSAGE", async (message: Message) => {
+      switch (message.type) {
+        case "CREATE_ROOM": {
+          const room = await createRoom(message.payload);
 
-      if (error) {
-        console.error(error);
-      }
-
-      if (data) {
-        socket.emit("roomCreated", data[0]);
-        socket.broadcast.emit("roomCreated", data[0]);
+          if (room) {
+            socket.emit("MESSAGE", {
+              type: "ROOM_CREATED",
+              payload: {
+                room,
+              },
+            });
+            socket.broadcast.emit("MESSAGE", {
+              type: "ROOM_CREATED",
+              payload: {
+                room,
+              },
+            });
+          }
+          break;
+        }
       }
     });
 

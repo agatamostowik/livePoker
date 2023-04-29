@@ -6,14 +6,21 @@ import {
   Route,
   RouterProvider,
 } from "react-router-dom";
-import { useAppSelector } from "../../redux/store";
+import { useAppDispatch } from "../../redux/store";
 import { Layout } from "../Layout";
 import { Signin } from "../SignIn";
 import { Rooms } from "../Rooms";
 import { Room } from "../Room";
+import {
+  Account,
+  setAccount,
+  setIsAuthenticated,
+  setUser,
+} from "../../redux/slices/auth";
+import { supabase } from "../../db";
 
 export const Routes = () => {
-  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const dispatch = useAppDispatch();
 
   return (
     <RouterProvider
@@ -24,7 +31,17 @@ export const Routes = () => {
             <Route
               path="signin"
               loader={async () => {
-                if (isAuthenticated) {
+                const { data } = await supabase.auth.getUser();
+
+                if (data.user) {
+                  const response = await fetch(
+                    `http://localhost:3001/api/auth/me?userId=${data.user.id}`
+                  );
+                  const account: Account = await response.json();
+
+                  dispatch(setUser(data.user));
+                  dispatch(setAccount(account));
+                  dispatch(setIsAuthenticated(true));
                   redirect("/rooms");
                 }
 
@@ -35,7 +52,18 @@ export const Routes = () => {
             <Route
               path="rooms"
               loader={async () => {
-                if (!isAuthenticated) {
+                const { data } = await supabase.auth.getUser();
+
+                if (data.user) {
+                  const response = await fetch(
+                    `http://localhost:3001/api/auth/me?userId=${data.user.id}`
+                  );
+                  const account: Account = await response.json();
+
+                  dispatch(setUser(data.user));
+                  dispatch(setAccount(account));
+                  dispatch(setIsAuthenticated(true));
+                } else {
                   throw redirect("/signin");
                 }
 

@@ -1,34 +1,28 @@
-import { query } from "../db";
+import _ from "lodash";
+import { supabase } from "../db";
 
-type User = {
-  id: string;
+export const createRoom = async (params: {
   name: string;
-  email: string;
-  password: string;
-};
+  dealerId: string;
+}) => {
+  const { name, dealerId } = params;
 
-export const getUserByEmail = async (email: User["email"]) => {
-  const queryString = `SELECT * FROM users WHERE email = '${email}';`;
+  try {
+    const { data, error } = await supabase
+      .from("rooms")
+      .insert([{ name: name, dealer_id: dealerId }])
+      .select("*");
 
-  const result = await query(queryString);
+    if (error) {
+      console.error(error);
+    }
 
-  return result[0];
-};
-
-export const getUserById = async (id: User["id"]) => {
-  const queryString = `SELECT * FROM users WHERE id = '${id}';`;
-
-  const result = await query(queryString);
-
-  return result[0];
-};
-
-export const createUser = async (encryptedUser: User) => {
-  const { name, email, password } = encryptedUser;
-
-  const queryString = `INSERT INTO users ("name", "email", "password") VALUES ('${name}', '${email}', '${password}') RETURNING "id", "name", "email";`;
-
-  const result = await query(queryString);
-
-  return result[0];
+    if (!_.isNull(data) && !_.isEmpty(data)) {
+      return data[0];
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.log(error);
+  }
 };

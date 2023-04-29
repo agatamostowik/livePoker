@@ -2,9 +2,9 @@ import styled, { css } from "styled-components";
 
 export const Container = styled.div`
   width: 100%;
-  color: white;
-  padding: 25%;
-  height: 100%;
+  color: #ffffff;
+  flex: 1;
+  flex-grow: 1;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -15,6 +15,8 @@ export const Head = styled.div`
   border-bottom: 1px solid red;
 `;
 
+export const Body = styled.div``;
+
 export const Table = styled.div`
   background-color: #181615;
   width: 100%;
@@ -24,6 +26,7 @@ export const Table = styled.div`
   padding: 47px;
   border: 1px solid #f2f3f338;
   border-radius: 8px;
+  max-width: 500px;
 `;
 
 export const Row = styled.div<{ occupied: boolean }>`

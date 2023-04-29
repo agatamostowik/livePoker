@@ -2,8 +2,8 @@ import _ from "lodash";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../redux/store";
 import { SignOut } from "../SignOut";
-import * as Styles from "./styles";
 import { Button } from "../Button";
+import * as Styles from "./styles";
 
 export const Topbar = () => {
   const navigate = useNavigate();
@@ -21,6 +21,7 @@ export const Topbar = () => {
           Login
         </Button>
       </Styles.Button>
+
       <SignOut />
     </Styles.Container>
   );

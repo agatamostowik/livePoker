@@ -1,6 +1,17 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 export const Container = styled.div`
+  align-items: center;
+  background-color: #000000;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+`;
+
+export const Wrapper = styled.div`
+  max-height: 100vh;
   position: relative;
   width: 100%;
   height: 100%;
@@ -23,7 +34,6 @@ export const H1 = styled.h1`
 
 export const Game = styled.div`
   position: absolute;
-
   top: 0;
   bottom: 0;
   left: 0;
@@ -61,7 +71,6 @@ export const ChipsContainer = styled.div`
   height: 100%;
   justify-content: center;
   align-items: center;
-  gap: 15px;
   z-index: 1;
 `;
 
@@ -76,17 +85,30 @@ export const PlayOrPassContainer = styled.div`
   z-index: 1;
 `;
 
-export const Chip = styled.button`
-  background-color: green;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
+export const ChipValue = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  font-size: 14px;
+  font-weight: bold;
+`;
 
-  &:disabled {
+export const Chip = styled.div`
+  position: relative;
+  width: 70px;
+  height: 70px;
+  /* transform: rotateX(55deg) rotateZ(-40deg); */
+  cursor: pointer;
+  backface-visibility: hidden;
+  svg {
+    filter: drop-shadow(-4px 4px 0px #1a1a1a);
+  }
+
+  /* &:disabled {
     background-color: grey;
     cursor: not-allowed;
-  }
+  } */
 `;
 
 export const PlacedBetChip = styled.div`
@@ -103,11 +125,20 @@ export const PlacedBetChip = styled.div`
 `;
 
 export const ActiveChip = styled.div<{ isActive: boolean }>`
-  border: 5px solid
-    ${(props) => {
-      return props.isActive ? "yellow" : "transparent";
-    }};
-  border-radius: 50%;
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  ${(props) => {
+    if (props.isActive) {
+      return css`
+        background: radial-gradient(farthest-side, #ffd700, transparent);
+      `;
+    }
+  }}
 `;
 
 export const Buttons = styled.div`
@@ -118,8 +149,7 @@ export const Buttons = styled.div`
   z-index: 1;
 `;
 
-export const AAButton = styled.div`
-  cursor: pointer;
+export const Tray = styled.div<{ disabled?: boolean }>`
   border: 5px solid #ffffff;
   border-radius: 10px;
   width: 200px;
@@ -129,37 +159,6 @@ export const AAButton = styled.div`
   align-items: center;
   color: #ffffff;
   font-size: 30px;
-`;
-
-export const AnteButton = styled.div`
-  cursor: pointer;
-  border: 5px solid #ffffff;
-  border-radius: 10px;
-  width: 200px;
-  height: 80px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #ffffff;
-  font-size: 30px;
-`;
-
-export const PlayButton = styled.div`
-  border: 5px solid #ffffff;
-  border-radius: 10px;
-  width: 200px;
-  height: 80px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #ffffff;
-  font-size: 30px;
-`;
-
-export const Test = styled.div`
-  width: 100%;
-  max-height: 100vh;
-  position: relative;
 `;
 
 export const Balance = styled.div`
@@ -168,4 +167,10 @@ export const Balance = styled.div`
   right: 0;
   font-size: 60px;
   color: #ffffff;
+`;
+
+export const Test = styled.div`
+  width: 100%;
+  max-height: 100vh;
+  position: relative;
 `;

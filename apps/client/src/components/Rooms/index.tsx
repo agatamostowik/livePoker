@@ -1,13 +1,12 @@
 import _ from "lodash";
+import * as Styled from "./styles";
 import { Topbar } from "../Topbar";
 import { Table } from "../Table";
-import * as Styled from "./styles";
 
 export const Rooms = () => {
   return (
     <Styled.Background>
       <Topbar />
-
       <Table />
     </Styled.Background>
   );
