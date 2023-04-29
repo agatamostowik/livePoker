@@ -6,6 +6,7 @@ export type State = {
   webSocketClient: Socket;
   mediaStream: MediaStream | null;
   isWebSocketConnected: boolean;
+  isPlayerConnected: boolean;
   videoIsPlaying: boolean;
 };
 
@@ -13,6 +14,7 @@ const initialState: State = {
   webSocketClient: webSocketClient,
   mediaStream: null,
   isWebSocketConnected: false,
+  isPlayerConnected: false,
   videoIsPlaying: false,
 };
 
@@ -32,6 +34,10 @@ const appSlice = createSlice({
       return { ...state, mediaStream: action.payload };
     },
 
+    setIsPlayerConnected: (state, action: PayloadAction<boolean>) => {
+      return { ...state, isPlayerConnected: action.payload };
+    },
+
     reset: () => {
       return initialState;
     },
@@ -40,6 +46,7 @@ const appSlice = createSlice({
 
 export const appReducer = appSlice.reducer;
 export const {
+  setIsPlayerConnected,
   setMediaStream,
   setVideoIsPlaying,
   setIsWebSocketConnected,

@@ -103,11 +103,6 @@ export const Chip = styled.div`
   svg {
     filter: drop-shadow(-4px 4px 0px #1a1a1a);
   }
-
-  /* &:disabled {
-    background-color: grey;
-    cursor: not-allowed;
-  } */
 `;
 
 export const PlacedBetChip = styled.div`
@@ -158,6 +153,15 @@ export const Tray = styled.div<{ disabled?: boolean }>`
   align-items: center;
   color: #ffffff;
   font-size: 30px;
+  cursor: pointer;
+
+  ${(props) => {
+    if (props.disabled) {
+      return css`
+        cursor: not-allowed;
+      `;
+    }
+  }}
 `;
 
 export const Balance = styled.div`

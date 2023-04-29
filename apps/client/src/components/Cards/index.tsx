@@ -1,11 +1,10 @@
 import { useAppSelector } from "../../redux/store";
-import { Card, Color, Rank } from "../Card/styles";
+import { Card } from "../Card";
+import { Color, Rank } from "../Card/styles";
 import * as Styled from "./styles";
 
 export const Cards = () => {
   const round = useAppSelector((state) => state.round.data);
-
-  const isVisible = round?.common_cards.length === 5;
 
   return (
     <Styled.Container>
@@ -15,14 +14,7 @@ export const Cards = () => {
           const rank = colorRank[0] as Rank;
           const color = colorRank[1] as Color;
 
-          return (
-            <Card
-              key={index}
-              side={isVisible ? "face" : "back"}
-              color={color}
-              rank={rank}
-            />
-          );
+          return <Card key={index} color={color} rank={rank} />;
         })}
       </Styled.Cards>
       <Styled.Cards>
@@ -31,7 +23,7 @@ export const Cards = () => {
           const rank = colorRank[0] as Rank;
           const color = colorRank[1] as Color;
 
-          return <Card key={index} side="face" color={color} rank={rank} />;
+          return <Card key={index} color={color} rank={rank} />;
         })}
       </Styled.Cards>
       <Styled.Cards>
@@ -40,7 +32,7 @@ export const Cards = () => {
           const rank = colorRank[0] as Rank;
           const color = colorRank[1] as Color;
 
-          return <Card key={index} side="face" color={color} rank={rank} />;
+          return <Card key={index} color={color} rank={rank} />;
         })}
       </Styled.Cards>
     </Styled.Container>

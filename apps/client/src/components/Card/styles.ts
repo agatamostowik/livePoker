@@ -1,5 +1,23 @@
 import styled, { css } from "styled-components";
 
+export const Container = styled.div`
+  perspective: 350px;
+`;
+
+export const Wrapper = styled.div`
+  position: relative;
+  margin: 0 auto;
+  width: 64px;
+  height: 90px;
+  cursor: pointer;
+  transition: transform 0.5s ease-in;
+  transform-style: preserve-3d;
+
+  &:hover {
+    transform: rotateY(180deg);
+  }
+`;
+
 export type Color = "spades" | "clubs" | "hearts" | "diamonds";
 
 export type Rank =
@@ -112,6 +130,8 @@ export const Card = styled.div<CardProps>`
   border-radius: 4px;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
   will-change: transform;
+  position: absolute;
+  backface-visibility: hidden;
 
   &::before,
   &::after {
@@ -133,10 +153,10 @@ export const Card = styled.div<CardProps>`
   &:after {
     bottom: 0.1rem;
     right: 0;
-    -webkit-transform: rotate(180deg);
+    /* -webkit-transform: rotate(180deg);
     -moz-transform: rotate(180deg);
     -o-transform: rotate(180deg);
-    -ms-transform: rotate(180deg);
+    -ms-transform: rotate(180deg); */
     transform: rotate(180deg);
   }
 
@@ -149,6 +169,7 @@ export const Card = styled.div<CardProps>`
         background-position: 50% 50%;
         background-size: 100% 100%;
         background-repeat: no-repeat;
+        transform: rotateY(-180deg);
       `;
     }
   }}

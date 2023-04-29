@@ -7,16 +7,19 @@ export type Game = {
   player_id: string;
   dealer: string;
   game_over: boolean;
+  dealer_id: string;
 };
 
 type State = {
   data: Game | null;
+  gameOver: boolean;
   isLoading: boolean;
   isSuccess: boolean;
 };
 
 const initialState: State = {
   data: null,
+  gameOver: false,
   isLoading: false,
   isSuccess: false,
 };
@@ -25,14 +28,18 @@ const gameSlice = createSlice({
   name: "game",
   initialState,
   reducers: {
+    setGameOver: (state) => {
+      return { ...state, ...initialState, gameOver: true };
+    },
+
     setGame: (state, action: PayloadAction<Game | null>) => {
-      state.data = action.payload;
+      return { ...state, data: action.payload };
     },
     setIsGameLoading: (state, action: PayloadAction<boolean>) => {
-      state.isLoading = action.payload;
+      return { ...state, isLoading: action.payload };
     },
   },
 });
 
 export const gameReducer = gameSlice.reducer;
-export const { setGame, setIsGameLoading } = gameSlice.actions;
+export const { setGameOver, setGame, setIsGameLoading } = gameSlice.actions;

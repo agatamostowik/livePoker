@@ -2,12 +2,12 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   Navigate,
+  Outlet,
   redirect,
   Route,
   RouterProvider,
 } from "react-router-dom";
 import { useAppDispatch } from "../../redux/store";
-import { Layout } from "../Layout";
 import { Signin } from "../SignIn";
 import { Rooms } from "../Rooms";
 import { Room } from "../Room";
@@ -26,7 +26,7 @@ export const Routes = () => {
     <RouterProvider
       router={createBrowserRouter(
         createRoutesFromElements(
-          <Route path="/" element={<Layout />}>
+          <Route path="/" element={<Outlet />}>
             <Route index element={<Navigate replace to="rooms" />} />
             <Route
               path="signin"

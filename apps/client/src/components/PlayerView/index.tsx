@@ -5,10 +5,11 @@ import { GameApi } from "../../redux/RTK";
 import { webSocketClient } from "../../webSocket";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { setMediaStream, setVideoIsPlaying } from "../../redux/slices/app";
-import * as Styled from "./styles";
 import { Cards } from "../Cards";
 import { Video } from "../Video";
 import { Chip } from "../Chip";
+import * as Styled from "./styles";
+import { setBet } from "../../redux/slices/round";
 
 const useWebRTC = () => {
   const dispatch = useAppDispatch();
@@ -79,21 +80,32 @@ const useWebRTC = () => {
   }, []);
 };
 
-const Buttons = (props: any) => {
-  const { bet, temporaryBalance, AABetSum, anteBetSum } = props;
-
+const Buttons = () => {
   const game = useAppSelector((state) => state.game.data);
   const round = useAppSelector((state) => state.round.data);
+  const account = useAppSelector((state) => state.auth.account);
+  const bet = useAppSelector((state) => state.round.bet);
+
+  const AABetSum = _.sum(round?.aa_bet);
+  const anteBetSum = _.sum(round?.ante_bet);
+  const temporaryBalance = account?.balance! - (AABetSum + anteBetSum);
+
+  const isDisabled =
+    round === null ||
+    round?.bets_over ||
+    bet === null ||
+    bet > temporaryBalance;
 
   const makeAnteBet = () => {
     if (bet) {
-      const isDisabled = bet > temporaryBalance;
-
       if (!isDisabled) {
-        webSocketClient.emit("makeAnteBet", {
-          anteBet: bet,
-          roundId: round?.id,
-          gameId: game?.id,
+        webSocketClient.emit("MESSAGE", {
+          type: "ANTE_BET",
+          payload: {
+            bet,
+            roundId: round?.id,
+            gameId: game?.id,
+          },
         });
       }
     }
@@ -101,13 +113,14 @@ const Buttons = (props: any) => {
 
   const makeAABet = () => {
     if (bet) {
-      const isDisabled = bet > temporaryBalance;
-
       if (!isDisabled) {
-        webSocketClient.emit("makeAABet", {
-          aaBet: bet,
-          roundId: round?.id,
-          gameId: game?.id,
+        webSocketClient.emit("MESSAGE", {
+          type: "AA_BET",
+          payload: {
+            bet,
+            roundId: round?.id,
+            gameId: game?.id,
+          },
         });
       }
     }
@@ -115,13 +128,13 @@ const Buttons = (props: any) => {
 
   return (
     <Styled.Buttons>
-      <Styled.Tray onClick={makeAABet}>
+      <Styled.Tray disabled={isDisabled} onClick={makeAABet}>
         AA
         {AABetSum > 0 && (
           <Styled.PlacedBetChip>{AABetSum}</Styled.PlacedBetChip>
         )}
       </Styled.Tray>
-      <Styled.Tray onClick={makeAnteBet}>
+      <Styled.Tray disabled={isDisabled} onClick={makeAnteBet}>
         ANTE
         {anteBetSum > 0 && (
           <Styled.PlacedBetChip>{anteBetSum}</Styled.PlacedBetChip>
@@ -137,8 +150,32 @@ const Buttons = (props: any) => {
   );
 };
 
-const Bets = (props: any) => {
-  const { bet, temporaryBalance, setBet } = props;
+const Bet = (props: { disabled: boolean; value: number }) => {
+  const dispatch = useAppDispatch();
+
+  const handleClick = () => {
+    if (props.disabled) {
+      return;
+    }
+    dispatch(setBet(props.value));
+  };
+
+  return (
+    <Styled.Chip onClick={handleClick}>
+      <Chip />
+      <Styled.ChipValue>{props.value}</Styled.ChipValue>
+    </Styled.Chip>
+  );
+};
+
+const Bets = () => {
+  const round = useAppSelector((state) => state.round.data);
+  const account = useAppSelector((state) => state.auth.account);
+  const bet = useAppSelector((state) => state.round.bet);
+
+  const AABetSum = _.sum(round?.aa_bet);
+  const anteBetSum = _.sum(round?.ante_bet);
+  const temporaryBalance = account?.balance! - (AABetSum + anteBetSum);
 
   return (
     <Styled.ChipsContainer>
@@ -151,15 +188,7 @@ const Bets = (props: any) => {
             key={value}
             isActive={!isDisabled ? isActive : false}
           >
-            <Styled.Chip
-              disabled={isDisabled}
-              onClick={() => {
-                setBet(value);
-              }}
-            >
-              <Chip />
-              <Styled.ChipValue>{value}</Styled.ChipValue>
-            </Styled.Chip>
+            <Bet disabled={isDisabled} value={value} />
           </Styled.ActiveChip>
         );
       })}
@@ -187,26 +216,33 @@ const PlayOrPass = () => {
   );
 };
 
-const Game = () => {
-  const room = useAppSelector((state) => state.room.data);
-  const game = useAppSelector((state) => state.game.data);
+const Balance = () => {
   const round = useAppSelector((state) => state.round.data);
-  const user = useAppSelector((state) => state.auth.user);
   const account = useAppSelector((state) => state.auth.account);
-
-  const [bet, setBet] = useState<number>(1);
-
-  const handleStartGame = () => {
-    webSocketClient.emit("startGame", {
-      roomId: room?.id,
-      playerId: user?.id,
-      dealerId: room?.dealer_id!,
-    });
-  };
 
   const AABetSum = _.sum(round?.aa_bet);
   const anteBetSum = _.sum(round?.ante_bet);
   const temporaryBalance = account?.balance! - (AABetSum + anteBetSum);
+
+  return <Styled.Balance>{temporaryBalance}</Styled.Balance>;
+};
+
+const Game = () => {
+  const room = useAppSelector((state) => state.room.data);
+  const game = useAppSelector((state) => state.game.data);
+  const round = useAppSelector((state) => state.round.data);
+  const account = useAppSelector((state) => state.auth.account);
+
+  const handleStartGame = () => {
+    webSocketClient.emit("MESSAGE", {
+      type: "CREATE_GAME",
+      payload: {
+        roomId: room?.id,
+        dealerId: room?.dealer_id!,
+        playerId: account?.id,
+      },
+    });
+  };
 
   const sumOfPlayedCards = useMemo(() => {
     if (round) {
@@ -229,25 +265,15 @@ const Game = () => {
           </Styled.JoinGameButton>
         ) : (
           <>
-            {round && round?.bets_over == false && (
-              <Bets
-                bet={bet}
-                temporaryBalance={temporaryBalance}
-                setBet={setBet}
-              />
-            )}
+            <Balance />
+            {round?.bets_over == false && <Bets />}
 
-            {round && sumOfPlayedCards === 7 && _.isNull(round.play_bet) && (
+            {sumOfPlayedCards === 7 && round?.play_bet === null && (
               <PlayOrPass />
             )}
 
             <Cards />
-            <Buttons
-              bet={bet}
-              temporaryBalance={temporaryBalance}
-              AABetSum={AABetSum}
-              anteBetSum={anteBetSum}
-            />
+            <Buttons />
           </>
         )}
       </Styled.Board>
@@ -257,7 +283,6 @@ const Game = () => {
 
 export const PlayerView = () => {
   useWebRTC();
-
   const mediaStream = useAppSelector((state) => state.app.mediaStream);
 
   return (

@@ -5,7 +5,6 @@ export type Room = {
   created_at: string;
   name: string;
   dealer_id: string;
-  stream_address: string | null; // do usunięcia
 };
 
 type State = {

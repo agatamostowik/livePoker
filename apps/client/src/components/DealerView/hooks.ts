@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { useEffect } from "react";
 import { useAppDispatch } from "../../redux/store";
-import { setMediaStream } from "../../redux/slices/app";
+import { setIsPlayerConnected, setMediaStream } from "../../redux/slices/app";
 import { Peer } from "peerjs";
 import { useAppSelector } from "../../redux/store";
 
@@ -12,7 +12,7 @@ export const useMediaStream = () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: true,
-        audio: true,
+        audio: false,
       });
 
       dispatch(setMediaStream(mediaStream));
@@ -27,6 +27,7 @@ export const useMediaStream = () => {
 };
 
 export const useWebRTC = () => {
+  const dispatch = useAppDispatch();
   const mediaStream = useAppSelector((state) => state.app.mediaStream)!;
 
   useEffect(() => {
@@ -55,9 +56,9 @@ export const useWebRTC = () => {
       console.log("error", error);
     });
 
-    peer.on("connection", () => {
+    peer.on("connection", (qwe) => {
       peer.call("player", mediaStream);
-      console.log("connected");
+      dispatch(setIsPlayerConnected(true));
     });
 
     peer.on("open", () => {

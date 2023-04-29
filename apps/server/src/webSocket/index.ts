@@ -1,7 +1,16 @@
 import _ from "lodash";
 import { Server, Socket } from "socket.io";
 import { supabase } from "../db";
-import { createRoom } from "../models";
+import {
+  createGame,
+  createRoom,
+  createRound,
+  getAccount,
+  getRound,
+  updateAccount,
+  updateGame,
+  updateRound,
+} from "../models";
 // @ts-ignore
 import pokersolver from "pokersolver";
 
@@ -29,13 +38,64 @@ const drawThreeCards = (cards: string[]) => {
   return { drawnCards: [firstCard, secondCard, thirdCard], cards: restCards };
 };
 
-type Message = {
-  type: "CREATE_ROOM";
-  payload: {
-    name: string;
-    dealerId: string;
-  };
-};
+type Message =
+  | {
+      type: "CREATE_ROOM";
+      payload: {
+        name: string;
+        dealerId: string;
+      };
+    }
+  | {
+      type: "CREATE_GAME";
+      payload: {
+        roomId: string;
+        dealerId: string;
+        playerId: string;
+      };
+    }
+  | {
+      type: "CREATE_ROUND";
+      payload: {
+        roomId: string;
+        playerId: string;
+        gameId: string;
+      };
+    }
+  | {
+      type: "STOP_BETS";
+      payload: {
+        roundId: string;
+        playerId: string;
+        gameId: string;
+      };
+    }
+  | {
+      type: "ANTE_BET";
+      payload: {
+        roundId: string;
+        bet: number;
+      };
+    }
+  | {
+      type: "AA_BET";
+      payload: {
+        roundId: string;
+        bet: number;
+      };
+    }
+  | {
+      type: "PLAY_FLOP_CARDS";
+      payload: {
+        roundId: string;
+      };
+    }
+  | {
+      type: "PLAY_TURN_RIVER_CARDS";
+      payload: {
+        roundId: string;
+      };
+    };
 
 export const webSocket = (httpServer: any) => {
   const io = new Server(httpServer, {
@@ -69,173 +129,233 @@ export const webSocket = (httpServer: any) => {
           }
           break;
         }
-      }
-    });
+        case "CREATE_GAME": {
+          const game = await createGame(message.payload);
 
-    socket.on("startGame", async (params) => {
-      const { data, error } = await supabase
-        .from("games")
-        .insert([
-          {
-            room_id: params.roomId,
-            player_id: params.playerId,
-            dealer_id: params.dealerId,
-            game_over: false,
-          },
-        ])
-        .select("*");
-
-      if (error) {
-        console.error(error);
-      }
-
-      if (data) {
-        socket.emit("gameStarted", data[0]);
-        socket.broadcast.emit("gameStarted", data[0]);
-      }
-    });
-
-    socket.on("startBetting", async (params) => {
-      const { data, error } = await supabase
-        .from("rounds")
-        .insert([
-          {
-            room_id: params.roomId,
-            player_id: params.playerId,
-            game_id: params.gameId,
-          },
-        ])
-        .select("*");
-
-      if (error) {
-        console.error(error);
-      }
-
-      if (data) {
-        socket.emit("bettingStarted", data[0]);
-        socket.broadcast.emit("bettingStarted", data[0]);
-      }
-    });
-
-    socket.on(
-      "makeAnteBet",
-      async (params: { roundId: string; gameId: string; anteBet: number }) => {
-        const { roundId, gameId, anteBet } = params;
-
-        const { data: initialRound } = await supabase
-          .from("rounds")
-          .select("ante_bet")
-          .eq("id", roundId);
-
-        const ante_bet = initialRound?.[0].ante_bet;
-
-        const { data: updatedRound, error } = await supabase
-          .from("rounds")
-          .update({
-            ante_bet: [...ante_bet, anteBet],
-          })
-          .eq("id", roundId)
-          .select("*");
-
-        if (error) {
-          console.error(error);
+          if (game) {
+            console.log(game);
+            socket.emit("MESSAGE", {
+              type: "GAME_CREATED",
+              payload: {
+                game,
+              },
+            });
+            socket.broadcast.emit("MESSAGE", {
+              type: "GAME_CREATED",
+              payload: {
+                game,
+              },
+            });
+          }
+          break;
         }
+        case "CREATE_ROUND": {
+          const round = await createRound(message.payload);
 
-        if (updatedRound) {
-          socket.emit("madeAnteBet", updatedRound[0]);
-          socket.broadcast.emit("madeAnteBet", updatedRound[0]);
+          if (round) {
+            socket.emit("MESSAGE", {
+              type: "ROUND_CREATED",
+              payload: {
+                round,
+              },
+            });
+            socket.broadcast.emit("MESSAGE", {
+              type: "ROUND_CREATED",
+              payload: {
+                round,
+              },
+            });
+          }
+          break;
         }
-      }
-    );
-
-    socket.on(
-      "stopBetting",
-      async (params: { roundId: string; playerId: string; gameId: string }) => {
-        const { roundId, playerId, gameId } = params;
-
-        // set bets_over to true
-        const { data: round } = await supabase
-          .from("rounds")
-          .update({
+        case "STOP_BETS": {
+          const round = await updateRound(message.payload.roundId, {
             bets_over: true,
-          })
-          .eq("id", roundId)
-          .select("*");
+          });
 
-        // finish game if player if the player doesn't bet
-        // if (round?.[0].ante_bet.length === 0) {
-        //   await supabase
-        //     .from("games")
-        //     .update({
-        //       game_over: true,
-        //     })
-        //     .eq("id", gameId);
+          if (round?.ante_bet.length === 0) {
+            await updateGame(message.payload.gameId, {
+              game_over: true,
+            });
+            await updateRound(message.payload.roundId, {
+              is_active: false,
+            });
 
-        //   await supabase
-        //     .from("rounds")
-        //     .update({
-        //       is_active: false,
-        //     })
-        //     .eq("id", roundId);
-        // }
+            socket.emit("MESSAGE", {
+              type: "GAME_OVER",
+            });
+            socket.broadcast.emit("MESSAGE", {
+              type: "GAME_OVER",
+            });
+          } else {
+            const playerIdAccount = await getAccount(message.payload.playerId);
+            const account = await updateAccount(message.payload.playerId, {
+              balance: playerIdAccount?.balance - _.sum(round?.ante_bet),
+            });
 
-        // fetch account for actual balance value
-        const { data: account } = await supabase
-          .from("accounts")
-          .select("*")
-          .eq("user_id", playerId);
+            socket.emit("MESSAGE", {
+              type: "BETS_STOPED",
+              payload: {
+                round,
+                account,
+              },
+            });
+            socket.broadcast.emit("MESSAGE", {
+              type: "BETS_STOPED",
+              payload: {
+                round,
+                account,
+              },
+            });
+          }
 
-        // update the account balance column by subtracting bets from the account balance value
-        const { data: updatedAccount } = await supabase
-          .from("accounts")
-          .update({
-            balance: account?.[0].balance - _.sum(round?.[0].ante_bet),
-          })
-          .eq("user_id", playerId)
-          .select("*");
+          break;
+        }
+        case "ANTE_BET": {
+          const initialRound = await getRound(message.payload.roundId);
 
-        socket.emit("bettingStopped", round?.[0]);
-        socket.broadcast.emit("bettingStopped", round?.[0]);
+          const round = await updateRound(message.payload.roundId, {
+            ante_bet: [...initialRound?.ante_bet, message.payload.bet],
+          });
+
+          if (round) {
+            socket.emit("MESSAGE", {
+              type: "MADE_ANTE_BET",
+              payload: {
+                round,
+              },
+            });
+            socket.broadcast.emit("MESSAGE", {
+              type: "MADE_ANTE_BET",
+              payload: {
+                round,
+              },
+            });
+          }
+
+          break;
+        }
+        case "AA_BET": {
+          const initialRound = await getRound(message.payload.roundId);
+
+          const round = await updateRound(message.payload.roundId, {
+            aa_bet: [...initialRound?.aa_bet, message.payload.bet],
+          });
+
+          if (round) {
+            socket.emit("MESSAGE", {
+              type: "MADE_AA_BET",
+              payload: {
+                round,
+              },
+            });
+            socket.broadcast.emit("MESSAGE", {
+              type: "MADE_AA_BET",
+              payload: {
+                round,
+              },
+            });
+          }
+
+          break;
+        }
+        case "PLAY_FLOP_CARDS": {
+          const round = await getRound(message.payload.roundId);
+
+          const dealer = drawTwoCards(round?.cards);
+          const common = drawThreeCards(dealer.cards);
+          const player = drawTwoCards(common.cards);
+
+          await updateRound(message.payload.roundId, {
+            dealer_cards: dealer.drawnCards,
+            common_cards: common.drawnCards,
+            player_cards: player.drawnCards,
+            cards: player.cards,
+          });
+
+          dealer.drawnCards.forEach((card, index) => {
+            setTimeout(() => {
+              socket.emit("MESSAGE", {
+                type: "PLAY_DEALER_CARD",
+                payload: {
+                  card,
+                },
+              });
+              socket.broadcast.emit("MESSAGE", {
+                type: "PLAY_DEALER_CARD",
+                payload: {
+                  card,
+                },
+              });
+            }, (0 + index) * 600);
+          });
+
+          common.drawnCards.forEach((card, index) => {
+            setTimeout(() => {
+              socket.emit("MESSAGE", {
+                type: "PLAY_COMMON_CARD",
+                payload: {
+                  card,
+                },
+              });
+              socket.broadcast.emit("MESSAGE", {
+                type: "PLAY_COMMON_CARD",
+                payload: {
+                  card,
+                },
+              });
+            }, (2 + index) * 600);
+          });
+
+          player.drawnCards.forEach((card, index) => {
+            setTimeout(() => {
+              socket.emit("MESSAGE", {
+                type: "PLAY_PLAYER_CARD",
+                payload: {
+                  card,
+                },
+              });
+              socket.broadcast.emit("MESSAGE", {
+                type: "PLAY_PLAYER_CARD",
+                payload: {
+                  card,
+                },
+              });
+            }, (5 + index) * 600);
+          });
+
+          break;
+        }
+        case "PLAY_TURN_RIVER_CARDS": {
+          const initialRound = await getRound(message.payload.roundId);
+
+          const { drawnCards, cards } = drawTwoCards(initialRound?.cards);
+
+          await updateRound(message.payload.roundId, {
+            cards: cards,
+            common_cards: [...initialRound?.common_cards, ...drawnCards],
+          });
+
+          drawnCards.forEach((card, index) => {
+            setTimeout(() => {
+              socket.emit("MESSAGE", {
+                type: "PLAY_COMMON_CARD",
+                payload: {
+                  card,
+                },
+              });
+              socket.broadcast.emit("MESSAGE", {
+                type: "PLAY_COMMON_CARD",
+                payload: {
+                  card,
+                },
+              });
+            }, index * 600);
+          });
+
+          break;
+        }
       }
-    );
-
-    socket.on("showCards", async (roundId) => {
-      const { data: round } = await supabase
-        .from("rounds")
-        .select("*")
-        .eq("id", roundId);
-
-      const dealer = drawTwoCards(round?.[0].cards); // [null, null]
-      const common = drawThreeCards(dealer.cards); // [null, null, null]
-      const player = drawTwoCards(common.cards); // [null, null]
-
-      await supabase
-        .from("rounds")
-        .update({
-          dealer_cards: dealer.drawnCards,
-          common_cards: common.drawnCards,
-          player_cards: player.drawnCards,
-          cards: player.cards,
-        })
-        .eq("id", roundId);
-
-      dealer.drawnCards.forEach((card, index) => {
-        setTimeout(() => {
-          socket.emit(`playDealerCard`, card);
-        }, (0 + index) * 600);
-      });
-
-      common.drawnCards.forEach((card, index) => {
-        setTimeout(() => {
-          socket.emit(`playCommonCard`, card);
-        }, (2 + index) * 600);
-      });
-
-      player.drawnCards.forEach((card, index) => {
-        setTimeout(() => {
-          socket.emit(`playPlayerCard`, card);
-        }, (5 + index) * 600);
-      });
     });
 
     socket.on("playBet", async (params) => {
@@ -259,30 +379,6 @@ export const webSocket = (httpServer: any) => {
         socket.emit("finishedPlayBet", updatedRound[0]);
         socket.broadcast.emit("finishedPlayBet", updatedRound[0]);
       }
-    });
-
-    socket.on("playTurnAndRiverCard", async (params) => {
-      const { data: initialRoundState } = await supabase
-        .from("rounds")
-        .select("*")
-        .eq("id", params.roundId);
-
-      const { drawnCards, cards } = drawTwoCards(initialRoundState?.[0].cards);
-
-      await supabase
-        .from("rounds")
-        .update({
-          cards: cards,
-          common_cards: [...initialRoundState?.[0].common_cards, ...drawnCards],
-        })
-        .eq("id", params.roundId)
-        .select("*");
-
-      drawnCards.forEach((card, index) => {
-        setTimeout(() => {
-          socket.emit(`playCommonCard`, card);
-        }, (0 + index) * 600);
-      });
     });
 
     socket.on("evaluateHands", async (params) => {

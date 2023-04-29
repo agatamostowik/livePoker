@@ -18,6 +18,8 @@ export type Round = {
 };
 type State = {
   data: Round | null;
+  roundOver: boolean;
+  bet: number | null;
   isLoading: boolean;
   isSuccess: boolean;
   error: Error | null;
@@ -25,6 +27,8 @@ type State = {
 
 const initialState: State = {
   data: null,
+  roundOver: false,
+  bet: null,
   isLoading: false,
   isSuccess: false,
   error: null,
@@ -34,6 +38,10 @@ const roundSlice = createSlice({
   name: "round",
   initialState,
   reducers: {
+    setRoundOver: (state) => {
+      return { ...state, ...initialState, roundOver: true };
+    },
+
     setRound: (state, action: PayloadAction<Round | null>) => {
       return { ...state, data: action.payload };
     },
@@ -57,11 +65,17 @@ const roundSlice = createSlice({
     setError: (state, action: PayloadAction<Error>) => {
       return { ...state, error: action.payload };
     },
+
+    setBet: (state, action: PayloadAction<number | null>) => {
+      return { ...state, bet: action.payload };
+    },
   },
 });
 
 export const roundReducer = roundSlice.reducer;
 export const {
+  setRoundOver,
+  setBet,
   setRound,
   setIsRoundLoading,
   addPlayerCards,

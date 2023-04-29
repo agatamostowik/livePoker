@@ -10,7 +10,6 @@ import { Input } from "../Input/Input";
 export const CreateRoomModal = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [name, setName] = useState("");
-  const user = useAppSelector((state) => state.auth.user);
   const account = useAppSelector((state) => state.auth.account);
 
   const handleCreateRoom = async () => {
@@ -18,7 +17,7 @@ export const CreateRoomModal = () => {
       type: "CREATE_ROOM",
       payload: {
         name: name,
-        dealerId: user?.id,
+        dealerId: account?.id,
       },
     });
 
