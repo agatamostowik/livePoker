@@ -18,12 +18,12 @@ const StartBetting = () => {
 
   return (
     <div>
-      <Styled.StartBetting
+      <Styled.SidebarButton
         disabled={game == null || round !== null}
         onClick={handleStartBetting}
       >
         Start taking bets
-      </Styled.StartBetting>
+      </Styled.SidebarButton>
     </div>
   );
 };
@@ -42,12 +42,12 @@ const StopBetting = () => {
 
   return (
     <div>
-      <Styled.StartBetting
+      <Styled.SidebarButton
         disabled={game == null || round === null || round?.bets_over === true}
         onClick={handleStopBetting}
       >
         Stop taking bets
-      </Styled.StartBetting>
+      </Styled.SidebarButton>
     </div>
   );
 };
@@ -66,9 +66,9 @@ const PlayTurnAndRiverCard = () => {
 
   return (
     <div>
-      <Styled.StartBetting disabled={isDisabled} onClick={handleClick}>
+      <Styled.SidebarButton disabled={isDisabled} onClick={handleClick}>
         Play Turn and River cards
-      </Styled.StartBetting>
+      </Styled.SidebarButton>
     </div>
   );
 };
@@ -99,9 +99,9 @@ const PlayFlopCards = () => {
 
   return (
     <div>
-      <Styled.StartBetting disabled={!isDisabled} onClick={showCards}>
+      <Styled.SidebarButton disabled={!isDisabled} onClick={showCards}>
         play flop cards
-      </Styled.StartBetting>
+      </Styled.SidebarButton>
     </div>
   );
 };
@@ -117,7 +117,9 @@ const EvaluateHands = () => {
 
   return (
     <div>
-      <Styled.StartBetting onClick={sprawdz}>sprawdz wynik</Styled.StartBetting>
+      <Styled.SidebarButton onClick={sprawdz}>
+        Check the result
+      </Styled.SidebarButton>
     </div>
   );
 };
@@ -128,32 +130,41 @@ export const Sidebar = () => {
   const round = useAppSelector((state) => state.round.data);
 
   return (
-    <Styled.Aside>
-      <div>Video is playing: {videoIsPlaying.toString()}</div>
-      {game && <Styled.Phase success>Player: Started the game.</Styled.Phase>}
-      {!game && (
-        <Styled.Phase>Waiting for player to join the game...</Styled.Phase>
-      )}
+    <Styled.AsideContainer>
+      <Styled.Aside>
+        <Styled.AsideBackground />
+        <Styled.Phases>
+          <Styled.Phase>
+            Video is playing: {videoIsPlaying.toString()}
+          </Styled.Phase>
+          {game && (
+            <Styled.Phase success>Player: Started the game.</Styled.Phase>
+          )}
+          {!game && (
+            <Styled.Phase>Waiting for player to join the game...</Styled.Phase>
+          )}
 
-      {game && round && (
-        <Styled.Phase success>Dealer: started the round.</Styled.Phase>
-      )}
-      {game && !round && (
-        <Styled.Phase>Waiting for round get started...</Styled.Phase>
-      )}
+          {game && round && (
+            <Styled.Phase success>Dealer: started the round.</Styled.Phase>
+          )}
+          {game && !round && (
+            <Styled.Phase>Waiting for round get started...</Styled.Phase>
+          )}
 
-      {game && round && round?.bets_over && (
-        <Styled.Phase success>Dealer: Zakłady zakończone</Styled.Phase>
-      )}
-      {game && round && !round?.bets_over && (
-        <Styled.Phase>Przyjmowanie zakładów</Styled.Phase>
-      )}
+          {game && round && round?.bets_over && (
+            <Styled.Phase success>Dealer: Zakłady zakończone</Styled.Phase>
+          )}
+          {game && round && !round?.bets_over && (
+            <Styled.Phase>Player is placing bets</Styled.Phase>
+          )}
 
-      <StartBetting />
-      {/* <StopBetting />
-      <PlayFlopCards />
-      <PlayTurnAndRiverCard />
-      <EvaluateHands /> */}
-    </Styled.Aside>
+          <StartBetting />
+          <StopBetting />
+          <PlayFlopCards />
+          <PlayTurnAndRiverCard />
+          <EvaluateHands />
+        </Styled.Phases>
+      </Styled.Aside>
+    </Styled.AsideContainer>
   );
 };

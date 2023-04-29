@@ -1,8 +1,10 @@
 import styled from "styled-components";
+import { Button } from "../Button";
 
 export const Container = styled.div`
   align-items: center;
-  background-color: #000000;
+  background-color: #181615;
+  color: white;
   display: flex;
   height: 100%;
   justify-content: center;
@@ -16,10 +18,15 @@ export const Wrapper = styled.div`
   width: 100%;
 `;
 
-export const Button = styled.button`
-  position: absolute;
-  top: 0;
-  right: 0;
+export const SidebarButton = styled(Button)`
+  &:disabled {
+    opacity: 0.5;
+    background-color: #838282;
+    cursor: not-allowed;
+    &:hover {
+      background-color: #838282;
+    }
+  }
 `;
 
 export const H1 = styled.h1`
@@ -36,15 +43,15 @@ export const Game = styled.div`
   right: 0;
 `;
 
-export const StartBetting = styled.button`
-  padding: 10px 20px;
-  background-color: pink;
-  cursor: pointer;
+// export const StartBetting = styled.button`
+//   padding: 10px 20px;
+//   background-color: pink;
+//   cursor: pointer;
 
-  &:disabled {
-    cursor: not-allowed;
-  }
-`;
+//   &:disabled {
+//     cursor: not-allowed;
+//   }
+// `;
 
 export const Board = styled.div`
   width: 100%;
@@ -56,13 +63,40 @@ export const Board = styled.div`
   flex-direction: column;
 `;
 
-export const Aside = styled.div`
-  background-color: yellow;
+export const AsideContainer = styled.div`
+  position: absolute;
   height: 100%;
   width: 300px;
-  position: absolute;
-  left: 0;
+  left: 0px;
   z-index: 2;
+`;
+
+export const Aside = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
+`;
+
+export const AsideBackground = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(24, 22, 21);
+  opacity: 0.5;
+  z-index: -1;
+`;
+
+export const Phases = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  color: white;
+  font-size: 16px;
+`;
+
+export const Phase = styled.div<{ success?: boolean }>`
+  color: ${(props) => (props.success ? "green" : "white")};
 `;
 
 export const Buttons = styled.div`
@@ -74,7 +108,7 @@ export const Buttons = styled.div`
 
 export const AAButton = styled.div`
   cursor: pointer;
-  border: 5px solid #ffffff;
+  border: 1px solid #ffffff;
   border-radius: 10px;
   width: 200px;
   height: 80px;
@@ -87,7 +121,7 @@ export const AAButton = styled.div`
 
 export const AnteButton = styled.div`
   cursor: pointer;
-  border: 5px solid #ffffff;
+  border: 1px solid #ffffff;
   border-radius: 10px;
   width: 200px;
   height: 80px;
@@ -99,7 +133,7 @@ export const AnteButton = styled.div`
 `;
 
 export const PlayButton = styled.div`
-  border: 5px solid #ffffff;
+  border: 1px solid #ffffff;
   border-radius: 10px;
   width: 200px;
   height: 80px;
@@ -122,5 +156,3 @@ export const PlacedBetChip = styled.div`
   justify-content: center;
   align-items: center;
 `;
-
-export const Phase = styled.div<{ success?: boolean }>``;

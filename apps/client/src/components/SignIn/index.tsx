@@ -82,7 +82,9 @@ export const Signin = () => {
             autoComplete="current-password"
           />
         </Styled.InputContainer>
-        {isError && <div>Something went wrong</div>}
+        {isError && (
+          <Styled.ErrorMessage>Something went wrong</Styled.ErrorMessage>
+        )}
 
         <Styled.Button type="submit" onClick={handleSubmit}>
           Sign in

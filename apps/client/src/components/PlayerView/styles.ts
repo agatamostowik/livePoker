@@ -1,4 +1,5 @@
 import styled, { css } from "styled-components";
+import { Button } from "../Button";
 
 export const Container = styled.div`
   align-items: center;
@@ -15,17 +16,17 @@ export const Wrapper = styled.div`
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: red;
+  background-color: #181615;
   display: flex;
   justify-content: center;
   align-items: center;
 `;
 
-export const Button = styled.button`
-  position: absolute;
-  top: 0;
-  right: 0;
-`;
+// export const Button = styled.button`
+//   position: absolute;
+//   top: 0;
+//   right: 0;
+// `;
 
 export const H1 = styled.h1`
   position: absolute;
@@ -54,14 +55,12 @@ export const Board = styled.div`
   align-items: flex-end;
 `;
 
-export const JoinGameButton = styled.button`
-  padding: 20px 30px;
-  background-color: pink;
+export const JoinGameButton = styled(Button)`
+  width: 150px;
   left: 50%;
   top: 50%;
   transform: translateX(-50%) translateY(-50%);
   position: absolute;
-  cursor: pointer;
 `;
 
 export const ChipsContainer = styled.div`
@@ -150,7 +149,7 @@ export const Buttons = styled.div`
 `;
 
 export const Tray = styled.div<{ disabled?: boolean }>`
-  border: 5px solid #ffffff;
+  border: 1px solid #ffffff;
   border-radius: 10px;
   width: 200px;
   height: 80px;
