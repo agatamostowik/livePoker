@@ -96,7 +96,7 @@ export const Phases = styled.div`
 `;
 
 export const Phase = styled.div<{ success?: boolean }>`
-  color: ${(props) => (props.success ? "green" : "white")};
+  color: ${(props) => (props.success ? "#2DBE5B" : "#FFFFFF")};
 `;
 
 export const Buttons = styled.div`

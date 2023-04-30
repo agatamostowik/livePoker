@@ -131,19 +131,28 @@ const Buttons = () => {
       <Styled.Tray disabled={isDisabled} onClick={makeAABet}>
         AA
         {AABetSum > 0 && (
-          <Styled.PlacedBetChip>{AABetSum}</Styled.PlacedBetChip>
+          <Styled.Chip>
+            <Chip value={5} />
+            <Styled.ChipValue>{AABetSum}</Styled.ChipValue>
+          </Styled.Chip>
         )}
       </Styled.Tray>
       <Styled.Tray disabled={isDisabled} onClick={makeAnteBet}>
         ANTE
         {anteBetSum > 0 && (
-          <Styled.PlacedBetChip>{anteBetSum}</Styled.PlacedBetChip>
+          <Styled.Chip>
+            <Chip value={5} />
+            <Styled.ChipValue>{anteBetSum}</Styled.ChipValue>
+          </Styled.Chip>
         )}
       </Styled.Tray>
       <Styled.Tray disabled>
         Play
         {round?.play_bet && (
-          <Styled.PlacedBetChip>{round.play_bet}</Styled.PlacedBetChip>
+          <Styled.Chip>
+            <Chip value={5} />
+            <Styled.ChipValue>{round.play_bet}</Styled.ChipValue>
+          </Styled.Chip>
         )}
       </Styled.Tray>
     </Styled.Buttons>
@@ -162,7 +171,7 @@ const Bet = (props: { disabled: boolean; value: number }) => {
 
   return (
     <Styled.Chip onClick={handleClick}>
-      <Chip />
+      <Chip value={props.value} />
       <Styled.ChipValue>{props.value}</Styled.ChipValue>
     </Styled.Chip>
   );
@@ -207,11 +216,13 @@ const PlayOrPass = () => {
 
   return (
     <Styled.PlayOrPassContainer>
-      <div>MAKE YOUR DECISION</div>
-      <div>
-        <button onClick={handlePlay}>PLAY x2</button>
-        <button>FOLD</button>
-      </div>
+      <Styled.Title>MAKE YOUR DECISION</Styled.Title>
+      <Styled.PlayOrPassButtonsContainer>
+        <Styled.PlayOrPassButton onClick={handlePlay} primary>
+          PLAY x2
+        </Styled.PlayOrPassButton>
+        <Styled.PlayOrPassButton>FOLD</Styled.PlayOrPassButton>
+      </Styled.PlayOrPassButtonsContainer>
     </Styled.PlayOrPassContainer>
   );
 };
@@ -224,7 +235,7 @@ const Balance = () => {
   const anteBetSum = _.sum(round?.ante_bet);
   const temporaryBalance = account?.balance! - (AABetSum + anteBetSum);
 
-  return <Styled.Balance>{temporaryBalance}</Styled.Balance>;
+  return <Styled.Balance>Balance: ${temporaryBalance}</Styled.Balance>;
 };
 
 const Game = () => {

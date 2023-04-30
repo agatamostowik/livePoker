@@ -123,11 +123,6 @@ webSocketClient.on("MESSAGE", (message: Message) => {
 
       break;
     }
-    case "MADE_ANTE_BET": {
-      store.dispatch(setRound(message.payload.round));
-
-      break;
-    }
     case "MADE_AA_BET": {
       store.dispatch(setRound(message.payload.round));
 

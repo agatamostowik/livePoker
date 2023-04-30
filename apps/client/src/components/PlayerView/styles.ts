@@ -75,13 +75,39 @@ export const ChipsContainer = styled.div`
 
 export const PlayOrPassContainer = styled.div`
   display: flex;
-  position: absolute;
-  width: 100%;
-  height: 100%;
+  flex-direction: column;
   justify-content: center;
+  position: absolute;
+  width: 25%;
+  height: 100%;
   align-items: center;
   gap: 15px;
   z-index: 1;
+`;
+
+export const PlayOrPassButton = styled.button<{ primary?: boolean }>`
+  background-color: ${(props) => (props.primary ? "#0b8b46" : "#e84040")};
+  padding: 11px;
+  width: 100%;
+  font-size: 15px;
+  border-radius: 5px;
+  border-style: none;
+  color: rgb(214, 216, 216);
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${(props) => (props.primary ? "#3ba26a" : "#ec6666")};
+  }
+`;
+
+export const PlayOrPassButtonsContainer = styled.div`
+  display: flex;
+  gap: 15px;
+  width: 100%;
+`;
+
+export const Title = styled.div`
+  color: white;
 `;
 
 export const ChipValue = styled.div`
@@ -90,7 +116,8 @@ export const ChipValue = styled.div`
   left: 50%;
   transform: translateX(-50%) translateY(-50%);
   font-size: 14px;
-  font-weight: bold;
+  font-weight: 500;
+  color: white;
 `;
 
 export const Chip = styled.div`
@@ -100,28 +127,15 @@ export const Chip = styled.div`
   /* transform: rotateX(55deg) rotateZ(-40deg); */
   cursor: pointer;
   backface-visibility: hidden;
-  svg {
+  /* svg {
     filter: drop-shadow(-4px 4px 0px #1a1a1a);
-  }
-`;
-
-export const PlacedBetChip = styled.div`
-  position: absolute;
-  border-radius: 50%;
-  transform: rotateX(50deg);
-  width: 100px;
-  height: 100px;
-  background-color: green;
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  } */
 `;
 
 export const ActiveChip = styled.div<{ isActive: boolean }>`
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 80px;
+  height: 80px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -166,10 +180,13 @@ export const Tray = styled.div<{ disabled?: boolean }>`
 
 export const Balance = styled.div`
   position: absolute;
-  top: 0;
-  right: 0;
-  font-size: 60px;
-  color: #ffffff;
+  top: 25px;
+  right: 25px;
+  font-size: 17px;
+  color: rgb(255, 255, 255);
+  padding: 10px 20px;
+  border: 1px solid #ffffff75;
+  border-radius: 10px;
 `;
 
 export const Test = styled.div`

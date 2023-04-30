@@ -23,7 +23,7 @@ export const Game = styled.div`
   position: absolute;
   right: 0;
   top: 0;
-  z-index: 1;
+  z-index: 2;
 `;
 
 export const Board = styled.div`
@@ -56,15 +56,24 @@ export const Button = styled.div`
   width: 200px;
 `;
 
-export const PlacedBetChip = styled.div`
-  align-items: center;
-  background-color: green;
-  border-radius: 50%;
-  color: white;
-  display: flex;
-  height: 100px;
-  justify-content: center;
+export const Chip = styled.div`
+  position: relative;
+  width: 70px;
+  height: 70px;
+  /* transform: rotateX(55deg) rotateZ(-40deg); */
+  cursor: pointer;
+  backface-visibility: hidden;
+  /* svg {
+    filter: drop-shadow(-4px 4px 0px #1a1a1a);
+  } */
+`;
+
+export const ChipValue = styled.div`
   position: absolute;
-  transform: rotateX(50deg);
-  width: 100px;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
 `;

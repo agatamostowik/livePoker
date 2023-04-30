@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { useAppSelector } from "../../redux/store";
 import * as Styled from "./styles";
+import { Chip } from "../Chip";
 
 export const Buttons = () => {
   const round = useAppSelector((state) => state.round.data);
@@ -13,19 +14,28 @@ export const Buttons = () => {
       <Styled.Button>
         AA
         {AABetSum > 0 && (
-          <Styled.PlacedBetChip>{AABetSum}</Styled.PlacedBetChip>
+          <Styled.Chip>
+            <Chip value={5} />
+            <Styled.ChipValue>{AABetSum}</Styled.ChipValue>
+          </Styled.Chip>
         )}
       </Styled.Button>
       <Styled.Button>
         ANTE
         {anteBetSum > 0 && (
-          <Styled.PlacedBetChip>{anteBetSum}</Styled.PlacedBetChip>
+          <Styled.Chip>
+            <Chip value={5} />
+            <Styled.ChipValue>{anteBetSum}</Styled.ChipValue>
+          </Styled.Chip>
         )}
       </Styled.Button>
       <Styled.Button>
         Play
         {round?.play_bet && (
-          <Styled.PlacedBetChip>{round.play_bet}</Styled.PlacedBetChip>
+          <Styled.Chip>
+            <Chip value={5} />
+            <Styled.ChipValue>{round.play_bet}</Styled.ChipValue>
+          </Styled.Chip>
         )}
       </Styled.Button>
     </Styled.Buttons>
