@@ -100,3 +100,28 @@ export const getUserAccount = () => {
     authenticate();
   }, []);
 };
+
+export const useCheckUser = () => {
+  const dispatch = useAppDispatch();
+
+  const checkUser = async () => {
+    const { data } = await supabase.auth.getUser();
+
+    if (data.user) {
+      const response = await fetch(
+        `http://localhost:3001/api/auth/me?userId=${data.user.id}`
+      );
+      const account: Account = await response.json();
+
+      dispatch(setUser(data.user));
+      dispatch(setAccount(account));
+      dispatch(setIsAuthenticated(true));
+
+      return { user: data.user, account: account };
+    } else {
+      return null;
+    }
+  };
+
+  return { checkUser };
+};

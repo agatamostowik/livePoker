@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import _ from "lodash";
 import { supabase } from "../db";
 
-export const getRoomsController = async (req: Request, res: Response) => {
+export const getRoomsController = async (_req: Request, res: Response) => {
   try {
     const { data, error } = await supabase.from("rooms").select("*");
 

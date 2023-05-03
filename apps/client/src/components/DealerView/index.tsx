@@ -6,15 +6,20 @@ import { useMediaStream, useWebRTC } from "./hooks";
 import { Buttons } from "./Buttons";
 import { Sidebar } from "../Sidebar";
 import * as Styled from "./styles";
+import { Result } from "../Result";
 
 const Game = () => {
+  const winner = useAppSelector((state) => state.round.winner);
   useWebRTC();
 
   return (
     <Styled.Game>
       <Styled.Board>
-        <Cards />
-        <Buttons />
+        <Styled.Layer>
+          {!_.isNull(winner) && <Result />}
+          <Cards />
+          <Buttons />
+        </Styled.Layer>
       </Styled.Board>
     </Styled.Game>
   );

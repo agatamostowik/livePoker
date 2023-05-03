@@ -1,130 +1,20 @@
 import _ from "lodash";
-import { useMemo } from "react";
-import { webSocketClient } from "../../webSocket";
 import { useAppSelector } from "../../redux/store";
+import { StartBettingButton } from "./StartBettingButton";
+import { StopBettingButton } from "./StopBettingButton";
+import { PlayFlopCardsButton } from "./PlayFlopCardsButton";
+import { PlayTurnRiverCardButton } from "./PlayTurnRiverCardButton";
+import { EvaluateHandsButton } from "./EvaluateHandsButton";
+import { NewRoundButton } from "./NewRoundButton";
 import * as Styled from "./styles";
 
-const StartBetting = (props: { isActive: boolean }) => {
-  const game = useAppSelector((state) => state.game.data);
-
-  const handleStartBetting = () => {
-    webSocketClient.emit("MESSAGE", {
-      type: "CREATE_ROUND",
-      payload: {
-        roomId: game?.room_id,
-        gameId: game?.id,
-        playerId: game?.player_id,
-        dealerId: game?.dealer_id,
-      },
-    });
-  };
-
-  return (
-    <div>
-      <Styled.SidebarButton
-        disabled={!props.isActive}
-        onClick={handleStartBetting}
-      >
-        Start taking bets
-      </Styled.SidebarButton>
-    </div>
-  );
-};
-
-const StopBetting = (props: { isActive: boolean }) => {
-  const game = useAppSelector((state) => state.game.data);
-  const round = useAppSelector((state) => state.round.data);
-
-  const handleStopBetting = () => {
-    webSocketClient.emit("MESSAGE", {
-      type: "STOP_BETS",
-      payload: {
-        roundId: round?.id,
-        playerId: game?.player_id,
-        gameId: game?.id,
-      },
-    });
-  };
-
-  return (
-    <div>
-      <Styled.SidebarButton
-        disabled={!props.isActive}
-        onClick={handleStopBetting}
-      >
-        Stop taking bets
-      </Styled.SidebarButton>
-    </div>
-  );
-};
-
-const PlayTurnRiverCard = (props: { isActive: boolean }) => {
-  const round = useAppSelector((state) => state.round.data);
-
-  const handleClick = () => {
-    webSocketClient.emit("MESSAGE", {
-      type: "PLAY_TURN_RIVER_CARDS",
-      payload: {
-        roundId: round?.id,
-      },
-    });
-  };
-
-  return (
-    <div>
-      <Styled.SidebarButton disabled={!props.isActive} onClick={handleClick}>
-        Play Turn and River cards
-      </Styled.SidebarButton>
-    </div>
-  );
-};
-
-const PlayFlopCards = (props: { isActive: boolean }) => {
-  const round = useAppSelector((state) => state.round.data);
-
-  const playFlopCards = () => {
-    webSocketClient.emit("MESSAGE", {
-      type: "PLAY_FLOP_CARDS",
-      payload: {
-        roundId: round?.id,
-      },
-    });
-  };
-
-  return (
-    <div>
-      <Styled.SidebarButton disabled={!props.isActive} onClick={playFlopCards}>
-        Play flop cards
-      </Styled.SidebarButton>
-    </div>
-  );
-};
-
-const EvaluateHands = (props: { isActive: boolean }) => {
-  const round = useAppSelector((state) => state.round.data);
-
-  const checkResult = () => {
-    webSocketClient.emit("evaluateHands", {
-      roundId: round?.id,
-    });
-  };
-
-  return (
-    <div>
-      <Styled.SidebarButton disabled={!props.isActive} onClick={checkResult}>
-        Check the result
-      </Styled.SidebarButton>
-    </div>
-  );
-};
-
 export const Sidebar = () => {
-  const isPlayerConnected = useAppSelector(
-    (state) => state.app.isPlayerConnected
-  );
   const videoIsPlaying = useAppSelector((state) => state.app.videoIsPlaying);
   const game = useAppSelector((state) => state.game.data);
   const round = useAppSelector((state) => state.round.data);
+  const isPlayerConnected = useAppSelector(
+    (state) => state.app.isPlayerConnected
+  );
 
   const numberCardsPlayed = round
     ? round?.dealer_cards?.length +
@@ -133,81 +23,106 @@ export const Sidebar = () => {
     : 0;
 
   return (
-    <Styled.AsideContainer>
+    <Styled.Container>
       <Styled.Aside>
-        <Styled.AsideBackground />
-        <Styled.Phases>
-          <Styled.Phase>Video: {videoIsPlaying ? "ON" : "OFF"}</Styled.Phase>
+        <Styled.Phase>
+          Video:{" "}
+          {videoIsPlaying ? (
+            <Styled.On>ON</Styled.On>
+          ) : (
+            <Styled.Off>OFF</Styled.Off>
+          )}
+        </Styled.Phase>
+        {game && (
+          <Styled.Phase success>Player has started the game.</Styled.Phase>
+        )}
+        {!game && (
           <Styled.Phase>
-            Player connected: {isPlayerConnected ? "YES" : "NO"}
+            Waiting for the player to start the game...
           </Styled.Phase>
-          {game && (
-            <Styled.Phase success>Player: Started the game.</Styled.Phase>
-          )}
-          {!game && (
-            <Styled.Phase>Waiting for player to join the game...</Styled.Phase>
-          )}
+        )}
 
-          {game && round && (
-            <Styled.Phase success>Dealer: Started the round.</Styled.Phase>
-          )}
-          {game && !round && (
-            <Styled.Phase>Waiting for round get started...</Styled.Phase>
-          )}
+        {game && round && (
+          <Styled.Phase success>Dealer has started the round.</Styled.Phase>
+        )}
+        {game && !round && (
+          <Styled.Phase>
+            Waiting for the dealer to start the round...
+          </Styled.Phase>
+        )}
 
-          {game && round && !round?.bets_over && (
-            <Styled.Phase>Player bets...</Styled.Phase>
-          )}
-          {game && round && round?.bets_over && (
-            <Styled.Phase success>Dealer: Finished bets.</Styled.Phase>
-          )}
+        {game && round && !round?.bets_over && (
+          <Styled.Phase>
+            Waiting for the player to finish betting...
+          </Styled.Phase>
+        )}
+        {game && round && round?.bets_over && (
+          <Styled.Phase success>
+            Dealer has finished accepting bets.
+          </Styled.Phase>
+        )}
 
-          {game && round && round?.bets_over && numberCardsPlayed < 7 && (
-            <Styled.Phase>Waiting for playing flop cards...</Styled.Phase>
-          )}
+        {game && round && round?.bets_over && numberCardsPlayed < 7 && (
+          <Styled.Phase>
+            Waiting for the dealer to play flop cards...
+          </Styled.Phase>
+        )}
+        {game && round && round?.bets_over && numberCardsPlayed >= 7 && (
+          <Styled.Phase success>
+            Dealer has played cards on the flop.
+          </Styled.Phase>
+        )}
 
-          {game && round && round?.bets_over && numberCardsPlayed >= 7 && (
-            <Styled.Phase success>
-              Dealer: Played cards on the flop
-            </Styled.Phase>
-          )}
-
-          {game && round && round?.bets_over && numberCardsPlayed >= 7 && (
+        {game &&
+          round &&
+          round?.bets_over &&
+          numberCardsPlayed >= 7 &&
+          !round.play_bet && (
             <Styled.Phase>
-              Waiting for playing turn and river cards...
+              Waiting for the player to play or fold...
+            </Styled.Phase>
+          )}
+        {game && round && round?.bets_over && round.play_bet && (
+          <Styled.Phase success>Player has placed a Play bet.</Styled.Phase>
+        )}
+
+        {game &&
+          round &&
+          round?.bets_over &&
+          numberCardsPlayed === 7 &&
+          round?.play_bet && (
+            <Styled.Phase>
+              Waiting for the dealer to play Turn and River cards...
+            </Styled.Phase>
+          )}
+        {game &&
+          round &&
+          round?.bets_over &&
+          numberCardsPlayed === 9 &&
+          round?.play_bet && (
+            <Styled.Phase success>
+              Dealer has played Turn and River cards.
             </Styled.Phase>
           )}
 
-          <StartBetting isActive={!_.isNull(game) && _.isNull(round)} />
-          <StopBetting
-            isActive={!_.isNull(game) && !_.isNull(round) && !round.bets_over}
-          />
-          <PlayFlopCards
-            isActive={
-              !_.isNull(game) &&
-              !_.isNull(round) &&
-              round.bets_over &&
-              numberCardsPlayed < 7
-            }
-          />
-          {/* <PlayTurnRiverCard
-            isActive={
-              !_.isNull(game) &&
-              !_.isNull(round) &&
-              round.bets_over &&
-              numberCardsPlayed === 7
-            }
-          /> */}
-          {/* <EvaluateHands
-            isActive={
-              !_.isNull(game) &&
-              !_.isNull(round) &&
-              round.bets_over &&
-              numberCardsPlayed === 9
-            }
-          /> */}
-        </Styled.Phases>
+        {game &&
+          round &&
+          round?.bets_over &&
+          numberCardsPlayed === 9 &&
+          round?.play_bet &&
+          !round.round_over && (
+            <Styled.Phase>
+              Waiting for the dealer to evaluate hands...
+            </Styled.Phase>
+          )}
+
+        <StartBettingButton />
+        <StopBettingButton />
+        <PlayFlopCardsButton />
+        <PlayTurnRiverCardButton />
+        <EvaluateHandsButton />
+        <NewRoundButton />
       </Styled.Aside>
-    </Styled.AsideContainer>
+    </Styled.Container>
   );
 };

@@ -18,15 +18,15 @@ export const Head = styled.div`
 export const Body = styled.div``;
 
 export const Table = styled.div`
-  background-color: #181615;
-  width: 100%;
+  background-color: rgba(23, 22, 20, 0.95);
+  border-radius: 8px;
+  border: 1px solid #f2f3f338;
   display: flex;
   flex-direction: column;
   gap: 26px;
-  padding: 47px;
-  border: 1px solid #f2f3f338;
-  border-radius: 8px;
   max-width: 500px;
+  padding: 47px;
+  width: 100%;
 `;
 
 export const Row = styled.div<{ occupied: boolean }>`

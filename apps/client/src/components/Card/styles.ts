@@ -4,18 +4,22 @@ export const Container = styled.div`
   perspective: 350px;
 `;
 
-export const Wrapper = styled.div`
+export const Wrapper = styled.div<{ isVisible: boolean }>`
   position: relative;
   margin: 0 auto;
   width: 64px;
   height: 90px;
-  cursor: pointer;
   transition: transform 0.5s ease-in;
   transform-style: preserve-3d;
+  transform: rotateY(180deg);
 
-  &:hover {
-    transform: rotateY(180deg);
-  }
+  ${(props) => {
+    if (props.isVisible) {
+      return css`
+        transform: rotateY(0deg);
+      `;
+    }
+  }}
 `;
 
 export type Color = "spades" | "clubs" | "hearts" | "diamonds";
@@ -43,15 +47,15 @@ type CardProps = {
   rank?: Rank;
 };
 
-const values = {
-  2: "2",
-  3: "3",
-  4: "4",
-  5: "5",
-  6: "6",
-  7: "7",
-  8: "8",
-  9: "9",
+const values: Record<string, string> = {
+  "2": "2",
+  "3": "3",
+  "4": "4",
+  "5": "5",
+  "6": "6",
+  "7": "7",
+  "8": "8",
+  "9": "9",
   T: "10",
   J: "J",
   Q: "Q",
@@ -59,7 +63,7 @@ const values = {
   A: "A",
 };
 
-const urls = {
+const urls: Record<string, Record<string, string>> = {
   s: {
     "2": new URL(`/src/assets/2_s.svg`, import.meta.url).href,
     "3": new URL(`/src/assets/3_s.svg`, import.meta.url).href,
@@ -153,10 +157,6 @@ export const Card = styled.div<CardProps>`
   &:after {
     bottom: 0.1rem;
     right: 0;
-    /* -webkit-transform: rotate(180deg);
-    -moz-transform: rotate(180deg);
-    -o-transform: rotate(180deg);
-    -ms-transform: rotate(180deg); */
     transform: rotate(180deg);
   }
 
@@ -220,9 +220,7 @@ export const Card = styled.div<CardProps>`
       return css`
         &:after,
         &:before {
-          content: "${(props) => {
-            return `${values[props.rank]}`;
-          }}";
+          content: "${values[props.rank]}";
         }
       `;
     }

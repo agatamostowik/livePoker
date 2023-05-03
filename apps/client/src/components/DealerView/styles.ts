@@ -3,7 +3,6 @@ import styled from "styled-components";
 export const Container = styled.div`
   align-items: center;
   background-color: #181615;
-  color: white;
   display: flex;
   height: 100%;
   justify-content: center;
@@ -38,8 +37,6 @@ export const Board = styled.div`
 
 export const Buttons = styled.div`
   display: flex;
-  position: absolute;
-  bottom: 10px;
   gap: 20px;
 `;
 
@@ -69,11 +66,38 @@ export const Chip = styled.div`
 `;
 
 export const ChipValue = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translateX(-50%) translateY(-50%);
+  color: #ffffff;
   font-size: 14px;
   font-weight: 500;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+`;
+
+export const PlacedBetChip = styled.div`
+  align-items: center;
+  background-color: green;
+  border-radius: 50%;
   color: white;
+  display: flex;
+  height: 100px;
+  justify-content: center;
+  position: absolute;
+  transform: rotateX(50deg);
+  width: 100px;
+`;
+
+export const Layer = styled.div`
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 10px;
+  gap: 20px;
 `;

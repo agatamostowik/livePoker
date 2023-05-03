@@ -107,17 +107,18 @@ export const PlayOrPassButtonsContainer = styled.div`
 `;
 
 export const Title = styled.div`
-  color: white;
+  color: #ffffff;
+  font-size: 22px;
 `;
 
 export const ChipValue = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translateX(-50%) translateY(-50%);
+  color: #ffffff;
   font-size: 14px;
   font-weight: 500;
-  color: white;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
 `;
 
 export const Chip = styled.div`
@@ -151,8 +152,6 @@ export const ActiveChip = styled.div<{ isActive: boolean }>`
 
 export const Buttons = styled.div`
   display: flex;
-  position: absolute;
-  bottom: 10px;
   gap: 20px;
   z-index: 1;
 `;
@@ -168,6 +167,7 @@ export const Tray = styled.div<{ disabled?: boolean }>`
   color: #ffffff;
   font-size: 30px;
   cursor: pointer;
+  background-color: rgba(23, 22, 20, 0.3);
 
   ${(props) => {
     if (props.disabled) {
@@ -178,19 +178,48 @@ export const Tray = styled.div<{ disabled?: boolean }>`
   }}
 `;
 
-export const Balance = styled.div`
-  position: absolute;
-  top: 25px;
-  right: 25px;
-  font-size: 17px;
-  color: rgb(255, 255, 255);
-  padding: 10px 20px;
-  border: 1px solid #ffffff75;
+export const Balance = styled.div<{ as?: "button" }>`
+  background-color: rgba(23, 22, 20, 0.3);
   border-radius: 10px;
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  font-size: 16px;
+  padding: 10px 20px;
+  ${(props) => {
+    if (props.as === "button") {
+      return css`
+        cursor: pointer;
+      `;
+    }
+  }}
 `;
 
 export const Test = styled.div`
   width: 100%;
   max-height: 100vh;
   position: relative;
+`;
+
+export const Info = styled.div`
+  position: absolute;
+  right: 25px;
+  top: 50px;
+  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  z-index: 3;
+`;
+
+export const Layer = styled.div`
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 10px;
+  gap: 20px;
 `;

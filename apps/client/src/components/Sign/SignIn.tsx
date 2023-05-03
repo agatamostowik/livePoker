@@ -10,8 +10,9 @@ import {
 } from "../../redux/slices/auth";
 import { Input } from "../Input/Input";
 import * as Styled from "./styles";
+import _ from "lodash";
 
-export const Signin = () => {
+export const SignIn = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -19,12 +20,10 @@ export const Signin = () => {
   const [isError, setIsError] = useState(false);
 
   const signInWithEmail = async (email: string, password: string) => {
-    const response = await supabase.auth.signInWithPassword({
+    return await supabase.auth.signInWithPassword({
       email: email,
       password: password,
     });
-
-    return response;
   };
 
   const handleEmail = (event: ChangeEvent<HTMLInputElement>) => {
@@ -39,7 +38,11 @@ export const Signin = () => {
     event.preventDefault();
 
     try {
-      const { data } = await signInWithEmail(email, password);
+      const { data, error } = await signInWithEmail(email, password);
+
+      if (error) {
+        setIsError(true);
+      }
 
       if (data.user) {
         const response = await fetch(
@@ -58,9 +61,16 @@ export const Signin = () => {
     }
   };
 
+  const handleNewUser = () => {
+    navigate("/signup");
+  };
+
+  const isDisabled = _.isEmpty(email) || _.isEmpty(password);
+
   return (
     <Styled.Background>
       <Styled.Container>
+        <Styled.Title>LOGIN</Styled.Title>
         <Styled.InputContainer>
           <Styled.Label>Email</Styled.Label>
           <Input
@@ -85,8 +95,15 @@ export const Signin = () => {
         {isError && (
           <Styled.ErrorMessage>Something went wrong</Styled.ErrorMessage>
         )}
-        <Styled.Button type="submit" onClick={handleSubmit}>
+        <Styled.Button
+          type="submit"
+          disabled={isDisabled}
+          onClick={handleSubmit}
+        >
           Sign in
+        </Styled.Button>
+        <Styled.Button disabled onClick={handleNewUser}>
+          New User
         </Styled.Button>
       </Styled.Container>
     </Styled.Background>

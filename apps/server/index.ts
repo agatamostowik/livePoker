@@ -18,14 +18,20 @@ declare global {
   }
 }
 
+export const origin = ["http://127.0.0.1:5173", "http://localhost:5173"];
 const port = process.env.PORT || 3001;
+
+// Express Server
 export const app = initApp();
+// Socket.IO Server
 export const io = webSocket(app);
+// WebRTC Server
 export const peerServer = PeerServer({
   port: 9000,
   path: "/peerjs",
   corsOptions: {
-    origin: ["http://127.0.0.1:5173", "http://localhost:5173"],
+    origin,
+    credentials: true,
   },
 });
 

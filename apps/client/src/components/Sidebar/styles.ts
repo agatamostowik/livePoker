@@ -2,14 +2,11 @@ import styled from "styled-components";
 import { Button } from "../Button";
 
 export const Container = styled.div`
-  align-items: center;
-  background-color: #181615;
-  color: white;
-  display: flex;
+  position: absolute;
   height: 100%;
-  justify-content: center;
-  position: relative;
-  width: 100%;
+  width: 350px;
+  left: 0px;
+  z-index: 3;
 `;
 
 export const Wrapper = styled.div`
@@ -43,16 +40,6 @@ export const Game = styled.div`
   right: 0;
 `;
 
-// export const StartBetting = styled.button`
-//   padding: 10px 20px;
-//   background-color: pink;
-//   cursor: pointer;
-
-//   &:disabled {
-//     cursor: not-allowed;
-//   }
-// `;
-
 export const Board = styled.div`
   width: 100%;
   height: 100%;
@@ -63,40 +50,19 @@ export const Board = styled.div`
   flex-direction: column;
 `;
 
-export const AsideContainer = styled.div`
-  position: absolute;
-  height: 100%;
-  width: 300px;
-  left: 0px;
-  z-index: 2;
-`;
-
 export const Aside = styled.div`
-  position: relative;
-  width: 100%;
-  height: 100%;
-`;
-
-export const AsideBackground = styled.div`
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: rgb(24, 22, 21);
-  opacity: 0.5;
-  z-index: -1;
-`;
-
-export const Phases = styled.div`
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 20px;
-  color: white;
-  font-size: 16px;
+  gap: 10px;
+  height: 100%;
+  padding: 10px;
 `;
 
 export const Phase = styled.div<{ success?: boolean }>`
   color: ${(props) => (props.success ? "#2DBE5B" : "#FFFFFF")};
+  display: flex;
+  font-size: 14px;
 `;
 
 export const Buttons = styled.div`
@@ -151,8 +117,20 @@ export const PlacedBetChip = styled.div`
   width: 100px;
   height: 100px;
   background-color: green;
-  color: white;
+  color: #ffffff;
   display: flex;
   justify-content: center;
   align-items: center;
+`;
+
+export const On = styled.div`
+  color: #2dbe5b;
+  font-weight: bold;
+  margin-left: 10px;
+`;
+
+export const Off = styled.div`
+  color: #be2d30;
+  font-weight: bold;
+  margin-left: 10px;
 `;

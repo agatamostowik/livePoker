@@ -15,7 +15,7 @@ export const Buttons = () => {
         AA
         {AABetSum > 0 && (
           <Styled.Chip>
-            <Chip value={5} />
+            <Chip value={25} />
             <Styled.ChipValue>{AABetSum}</Styled.ChipValue>
           </Styled.Chip>
         )}
@@ -33,7 +33,7 @@ export const Buttons = () => {
         Play
         {round?.play_bet && (
           <Styled.Chip>
-            <Chip value={5} />
+            <Chip value={500} />
             <Styled.ChipValue>{round.play_bet}</Styled.ChipValue>
           </Styled.Chip>
         )}

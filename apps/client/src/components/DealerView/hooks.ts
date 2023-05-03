@@ -35,35 +35,20 @@ export const useWebRTC = () => {
       host: "localhost",
       port: 9000,
       path: "/peerjs",
-      // config: {
-      //   iceServers: [
-      //     { url: "stun:stun.l.google.com:19302" },
-      //     {
-      //       url: "turn:192.158.29.39:3478?transport=udp",
-      //       credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
-      //       username: "28224511:1379330808",
-      //     },
-      //     {
-      //       url: "turn:192.158.29.39:3478?transport=tcp",
-      //       credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
-      //       username: "28224511:1379330808",
-      //     },
-      //   ],
-      // },
-    });
-
-    peer.on("error", (error) => {
-      console.log("error", error);
-    });
-
-    peer.on("connection", (qwe) => {
-      peer.call("player", mediaStream);
-      dispatch(setIsPlayerConnected(true));
     });
 
     peer.on("open", () => {
       peer.call("player", mediaStream);
       console.log("opened");
+    });
+
+    // peer.on("error", (error) => {
+    //   console.log("error", error);
+    // });
+
+    peer.on("connection", (qwe) => {
+      peer.call("player", mediaStream);
+      dispatch(setIsPlayerConnected(true));
     });
 
     peer.on("disconnected", () => {

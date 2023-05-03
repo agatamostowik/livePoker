@@ -2,85 +2,24 @@ import _ from "lodash";
 import { io } from "socket.io-client";
 import { setIsWebSocketConnected } from "../redux/slices/app";
 import { store } from "../redux/store";
-import { Room } from "../redux/RTK";
 import {
-  Round,
   addCommonCards,
   addDealerCards,
   addPlayerCards,
   setRound,
   setRoundOver,
+  setWinner,
 } from "../redux/slices/round";
-import { Game, setGame, setGameOver } from "../redux/slices/game";
+import { setGame, setGameOver } from "../redux/slices/game";
 import { appendRoom } from "../redux/slices/rooms";
 import { setAccount } from "../redux/slices/auth";
-import { Account } from "../redux/slices/auth";
+import { Message } from "./types";
 
 export const webSocketClient = io("ws://localhost:3001");
 
 webSocketClient.on("HANDSHAKE", () => {
   store.dispatch(setIsWebSocketConnected(true));
 });
-
-type Message =
-  | {
-      type: "ROOM_CREATED";
-      payload: {
-        room: Room;
-      };
-    }
-  | {
-      type: "GAME_CREATED";
-      payload: {
-        game: Game;
-      };
-    }
-  | {
-      type: "ROUND_CREATED";
-      payload: {
-        round: Round;
-      };
-    }
-  | {
-      type: "BETS_STOPED";
-      payload: {
-        round: Round;
-        account: Account;
-      };
-    }
-  | {
-      type: "GAME_OVER";
-    }
-  | {
-      type: "MADE_ANTE_BET";
-      payload: {
-        round: Round;
-      };
-    }
-  | {
-      type: "MADE_AA_BET";
-      payload: {
-        round: Round;
-      };
-    }
-  | {
-      type: "PLAY_DEALER_CARD";
-      payload: {
-        card: string;
-      };
-    }
-  | {
-      type: "PLAY_COMMON_CARD";
-      payload: {
-        card: string;
-      };
-    }
-  | {
-      type: "PLAY_PLAYER_CARD";
-      payload: {
-        card: string;
-      };
-    };
 
 webSocketClient.on("MESSAGE", (message: Message) => {
   switch (message.type) {
@@ -90,13 +29,18 @@ webSocketClient.on("MESSAGE", (message: Message) => {
       break;
     }
     case "GAME_CREATED": {
-      console.log(message.payload.game);
       store.dispatch(setGame(message.payload.game));
 
       break;
     }
     case "ROUND_CREATED": {
       store.dispatch(setRound(message.payload.round));
+      store.dispatch(
+        setWinner({
+          winner: null,
+          winnerHand: null,
+        })
+      );
 
       break;
     }
@@ -143,25 +87,28 @@ webSocketClient.on("MESSAGE", (message: Message) => {
 
       break;
     }
+    case "MADE_PLAY_BET": {
+      store.dispatch(setRound(message.payload.round));
+
+      break;
+    }
+    case "ROUND_OVER": {
+      store.dispatch(setRound(message.payload.round));
+
+      if (
+        message.payload.account &&
+        store.getState().auth.account?.role === "player"
+      ) {
+        store.dispatch(setAccount(message.payload.account));
+      }
+
+      store.dispatch(
+        setWinner({
+          winner: message.payload.winner,
+          winnerHand: message.payload.winner_hand,
+        })
+      );
+      break;
+    }
   }
-});
-
-webSocketClient.on("madeAnteBet", (round: Round) => {
-  store.dispatch(setRound(round));
-});
-
-// webSocketClient.on("playDealerCard", (card: string) => {
-//   store.dispatch(addDealerCards(card));
-// });
-
-// webSocketClient.on("playCommonCard", (card: string) => {
-//   store.dispatch(addCommonCards(card));
-// });
-
-// webSocketClient.on("playPlayerCard", (card: string) => {
-//   store.dispatch(addPlayerCards(card));
-// });
-
-webSocketClient.on("finishedPlayBet", (round: Round) => {
-  store.dispatch(setRound(round));
 });

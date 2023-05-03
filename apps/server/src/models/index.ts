@@ -1,16 +1,11 @@
 import _ from "lodash";
 import { supabase } from "../db";
 
-export const createRoom = async (params: {
-  name: string;
-  dealerId: string;
-}) => {
-  const { name, dealerId } = params;
-
+export const createRoom = async (params: unknown) => {
   try {
     const { data, error } = await supabase
       .from("rooms")
-      .insert([{ name: name, dealer_id: dealerId }])
+      .insert(params)
       .select("*");
 
     if (error) {
@@ -113,6 +108,27 @@ export const createRound = async (params: {
   }
 };
 
+export const getRound = async (roundId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("rounds")
+      .select("*")
+      .eq("id", roundId);
+
+    if (error) {
+      console.error(error);
+    }
+
+    if (!_.isNull(data) && !_.isEmpty(data)) {
+      return data[0];
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const updateRound = async (roundId: string, params: unknown) => {
   try {
     const { data, error } = await supabase
@@ -140,7 +156,7 @@ export const getAccount = async (accountId: string) => {
     const { data, error } = await supabase
       .from("accounts")
       .select("*")
-      .eq("user_id", accountId);
+      .eq("id", accountId);
 
     if (error) {
       console.error(error);
@@ -161,29 +177,8 @@ export const updateAccount = async (accountId: string, params: unknown) => {
     const { data, error } = await supabase
       .from("accounts")
       .update(params)
-      .eq("user_id", accountId)
+      .eq("id", accountId)
       .select("*");
-
-    if (error) {
-      console.error(error);
-    }
-
-    if (!_.isNull(data) && !_.isEmpty(data)) {
-      return data[0];
-    } else {
-      return null;
-    }
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-export const getRound = async (roundId: string) => {
-  try {
-    const { data, error } = await supabase
-      .from("rounds")
-      .select("*")
-      .eq("id", roundId);
 
     if (error) {
       console.error(error);

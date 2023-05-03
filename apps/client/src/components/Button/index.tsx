@@ -16,6 +16,7 @@ export const Button = styled.button`
 
   &:disabled {
     opacity: 0.5;
+
     &:hover {
       background-color: #4b24a1;
       cursor: not-allowed;

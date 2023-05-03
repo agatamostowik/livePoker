@@ -10,10 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@dicebear/collection": "^6.0.2",
-    "@dicebear/core": "^6.0.2",
     "@reduxjs/toolkit": "^1.9.3",
-    "@supabase/auth-ui-react": "^0.3.5",
     "@supabase/supabase-js": "^2.17.0",
     "lodash": "^4.17.21",
     "peerjs": "^1.4.7",
@@ -21,10 +18,7 @@
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.10.0",
-    "react-use": "^17.4.0",
     "sanitize.css": "^13.0.0",
-    "simple-peer": "^9.11.1",
-    "simplewebrtc": "^3.0.2",
     "socket.io": "^4.6.1",
     "styled-components": "^5.3.9",
     "styled-icons": "^10.47.0"
@@ -35,7 +29,6 @@
     "@types/peerjs": "^1.1.0",
     "@types/react": "^18.0.33",
     "@types/react-dom": "^18.0.11",
-    "@types/simple-peer": "^9.11.5",
     "@types/socket.io": "^3.0.2",
     "@types/socket.io-client": "^3.0.0",
     "@types/styled-components": "^5.1.26",

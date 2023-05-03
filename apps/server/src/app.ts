@@ -3,6 +3,7 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import { createServer } from "http";
 import { rootRouter } from "./routes";
+import { origin } from "../index";
 
 export const initApp = () => {
   // Create Express application instance
@@ -11,7 +12,7 @@ export const initApp = () => {
   // Global middlewares
   app.use(
     cors({
-      origin: ["http://127.0.0.1:5173", "http://localhost:5173"],
+      origin,
       credentials: true,
     })
   );

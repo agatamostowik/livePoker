@@ -7,10 +7,10 @@ export const findGameByRoomIdController = async (
   res: Response
 ) => {
   try {
-    const { data, error } = await supabase
-      .from("games")
-      .select("*")
-      .eq("room_id", req.query.roomId);
+    const { data, error } = await supabase.from("games").select("*").match({
+      room_id: req.query.roomId,
+      game_over: false,
+    });
 
     if (error) {
       res.status(400).json({ status: "error", error: error });

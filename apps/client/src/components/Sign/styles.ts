@@ -18,7 +18,7 @@ export const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 15px;
-  background-color: #181615;
+  background-color: rgba(23, 22, 20, 0.95);
   width: 500px;
   padding: 100px;
   border: 1px solid #f2f3f338;
@@ -37,20 +37,32 @@ export const InputContainer = styled.div`
 
 export const Button = styled.button`
   background-color: #4b24a1;
-  padding: 11px;
-  font-size: 15px;
   border-radius: 5px;
   border-style: none;
   color: rgb(214, 216, 216);
-  margin-top: 15px;
   cursor: pointer;
+  font-size: 15px;
+  padding: 11px;
+  transition: all 0.4s ease;
 
   &:hover {
     background-color: #523590;
+  }
+
+  &:disabled {
+    background-color: #f2f3f338;
+    cursor: not-allowed;
   }
 `;
 
 export const ErrorMessage = styled.div`
   font-size: 13px;
   color: #ca142d;
+`;
+
+export const Title = styled.div`
+  color: #ffffff;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 100;
 `;

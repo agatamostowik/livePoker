@@ -1,11 +1,11 @@
-import { ChangeEvent, useState } from "react";
 import _ from "lodash";
+import { ChangeEvent, useState } from "react";
 import { useAppSelector } from "../../redux/store";
 import { webSocketClient } from "../../webSocket";
 import { Modal } from "../Modal";
-import * as Styled from "./styles";
 import { Button } from "../Button";
 import { Input } from "../Input/Input";
+import * as Styled from "./styles";
 
 export const CreateRoomModal = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);

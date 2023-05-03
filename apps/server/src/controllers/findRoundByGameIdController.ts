@@ -7,10 +7,10 @@ export const findRoundByGameIdController = async (
   res: Response
 ) => {
   try {
-    const { data, error } = await supabase
-      .from("rounds")
-      .select("*")
-      .eq("game_id", req.query.gameId);
+    const { data, error } = await supabase.from("rounds").select("*").match({
+      game_id: req.query.gameId,
+      round_over: false,
+    });
 
     if (error) {
       res.status(400).json({ status: "error", error: error });
