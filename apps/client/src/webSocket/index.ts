@@ -20,7 +20,9 @@ const url =
     ? "ws://localhost:3001"
     : "ws://livepokerbe-production.up.railway.app";
 
-export const webSocketClient = io("ws://livepokerbe-production.up.railway.app");
+console.log("ENV: ", process.env.NODE_ENV);
+
+export const webSocketClient = io(url);
 
 webSocketClient.on("HANDSHAKE", () => {
   store.dispatch(setIsWebSocketConnected(true));
