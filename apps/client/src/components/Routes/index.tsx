@@ -1,5 +1,6 @@
 import {
   createBrowserRouter,
+  createHashRouter,
   createRoutesFromElements,
   Navigate,
   Outlet,
@@ -18,7 +19,7 @@ export const Routes = () => {
 
   return (
     <RouterProvider
-      router={createBrowserRouter(
+      router={createHashRouter(
         createRoutesFromElements(
           <Route path="/" element={<Outlet />}>
             <Route index element={<Navigate replace to="rooms" />} />

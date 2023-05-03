@@ -18,7 +18,7 @@ import { Message } from "./types";
 const url =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "ws://localhost:3001"
-    : "ws://livepokerbe-production.up.railway.app";
+    : "wss://livepokerbe-production.up.railway.app";
 
 console.log("ENV: ", process.env.NODE_ENV);
 
