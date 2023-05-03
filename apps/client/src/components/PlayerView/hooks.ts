@@ -15,31 +15,31 @@ export const useWebRTC = () => {
           : "livepokerbe-production.up.railway.app",
       port: 9000,
       path: "/peerjs",
-      // config: {
-      //   iceServers: [
-      //     { url: "stun:stun.l.google.com:19302" },
+      config: {
+        iceServers: [
+          { url: "stun:stun.l.google.com:19302" },
 
-      //     {
-      //       url: "turn:192.158.29.39:3478?transport=udp",
-      //       credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
-      //       username: "28224511:1379330808",
-      //     },
-      //     {
-      //       url: "turn:192.158.29.39:3478?transport=tcp",
-      //       credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
-      //       username: "28224511:1379330808",
-      //     },
-      //   ],
-      // },
+          {
+            url: "turn:192.158.29.39:3478?transport=udp",
+            credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+            username: "28224511:1379330808",
+          },
+          {
+            url: "turn:192.158.29.39:3478?transport=tcp",
+            credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+            username: "28224511:1379330808",
+          },
+        ],
+      },
     });
 
-    // peer.on("error", (error) => {
-    //   console.log("error", error);
-    // });
+    peer.on("error", (error) => {
+      console.log("error", error);
+    });
 
-    // peer.on("connection", () => {
-    //   console.log("connected");
-    // });
+    peer.on("connection", () => {
+      console.log("connected");
+    });
 
     peer.on("open", () => {
       console.log("Opened connection, calling a dealer...");
@@ -60,14 +60,6 @@ export const useWebRTC = () => {
           peer.connect("dealer");
         }
       });
-
-      // call.on("close", () => {
-      //   console.log("close");
-      // });
-
-      // call.on("error", () => {
-      //   console.log("error");
-      // });
 
       call.on("stream", (remoteStream) => {
         dispatch(setMediaStream(remoteStream));
