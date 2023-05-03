@@ -56,6 +56,8 @@ export const useWebRTC = () => {
       },
     });
 
+    console.log(peer);
+
     peer.on("open", () => {
       peer.call("player", mediaStream);
       console.log("opened");

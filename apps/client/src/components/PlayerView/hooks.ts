@@ -33,6 +33,8 @@ export const useWebRTC = () => {
       },
     });
 
+    console.log(peer);
+
     peer.on("error", (error) => {
       console.log("error", error);
     });
