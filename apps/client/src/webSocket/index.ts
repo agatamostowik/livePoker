@@ -15,7 +15,12 @@ import { appendRoom } from "../redux/slices/rooms";
 import { setAccount } from "../redux/slices/auth";
 import { Message } from "./types";
 
-export const webSocketClient = io("ws://localhost:3001");
+const url =
+  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+    ? "ws://localhost:3001"
+    : "ws://livepokerbe-production.up.railway.app";
+
+export const webSocketClient = io("ws://livepokerbe-production.up.railway.app");
 
 webSocketClient.on("HANDSHAKE", () => {
   store.dispatch(setIsWebSocketConnected(true));

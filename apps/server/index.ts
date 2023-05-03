@@ -18,7 +18,11 @@ declare global {
   }
 }
 
-export const origin = ["http://127.0.0.1:5173", "http://localhost:5173"];
+export const origin = [
+  "http://127.0.0.1:5173",
+  "http://localhost:5173",
+  "https://livepoker-production.up.railway.app",
+];
 const port = process.env.PORT || 3001;
 
 // Express Server

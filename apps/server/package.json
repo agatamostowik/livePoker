@@ -1,13 +1,12 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "type": "module",
   "private": true,
   "author": "Agata Mostowik",
   "scripts": {
     "dev": "nodemon index.ts -- --trace-warnings",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node ./dist/index.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.20.0",

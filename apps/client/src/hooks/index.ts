@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useAppDispatch } from "../redux/store";
 import { Game, setGame } from "../redux/slices/game";
 import { Room, setRoom } from "../redux/slices/room";
@@ -10,10 +10,17 @@ import {
   Account,
   setAccount,
   setIsAuthenticated,
-  setIsLoading,
   setUser,
 } from "../redux/slices/auth";
 import { supabase } from "../db";
+
+export const getUrl = () => {
+  if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
+    return "http://localhost:3001";
+  } else {
+    return "https://livepokerbe-production.up.railway.app";
+  }
+};
 
 export const useGetInitalDataOnMount = () => {
   const { roomId } = useParams();
@@ -21,20 +28,21 @@ export const useGetInitalDataOnMount = () => {
 
   const getData = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/api/rooms/${roomId}`);
+      const url = getUrl();
+      const response = await fetch(`${url}/api/rooms/${roomId}`);
       const room: Room = await response.json();
       dispatch(setRoom(room));
 
       if (room?.id) {
         const response = await fetch(
-          `http://localhost:3001/api/games/find?roomId=${room?.id}`
+          `${url}/api/games/find?roomId=${room?.id}`
         );
         const game: Game = await response.json();
         dispatch(setGame(game));
 
         if (game?.id) {
           const response = await fetch(
-            `http://localhost:3001/api/rounds/find?gameId=${game?.id}`
+            `${url}/api/rounds/find?gameId=${game?.id}`
           );
           const round: Round = await response.json();
           dispatch(setRound(round));
@@ -58,7 +66,8 @@ export const useGetRooms = () => {
   const getRooms = async () => {
     dispatch(setIsRoomsLoading(true));
     try {
-      const response = await fetch(`http://localhost:3001/api/rooms`);
+      const url = getUrl();
+      const response = await fetch(`${url}/api/rooms`);
       const room: Room[] = await response.json();
 
       dispatch(setRooms(room));
@@ -73,44 +82,15 @@ export const useGetRooms = () => {
   }, []);
 };
 
-export const getUserAccount = () => {
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-
-  const authenticate = async () => {
-    dispatch(setIsLoading(true));
-    const { data } = await supabase.auth.getUser();
-
-    if (data.user) {
-      const response = await fetch(
-        `http://localhost:3001/api/auth/me?userId=${data.user.id}`
-      );
-      const account: Account = await response.json();
-
-      dispatch(setUser(data.user));
-      dispatch(setAccount(account));
-      dispatch(setIsAuthenticated(true));
-      navigate("/rooms");
-    }
-
-    dispatch(setIsLoading(false));
-  };
-
-  useEffect(() => {
-    authenticate();
-  }, []);
-};
-
 export const useCheckUser = () => {
+  const url = getUrl();
   const dispatch = useAppDispatch();
 
   const checkUser = async () => {
     const { data } = await supabase.auth.getUser();
 
     if (data.user) {
-      const response = await fetch(
-        `http://localhost:3001/api/auth/me?userId=${data.user.id}`
-      );
+      const response = await fetch(`${url}/api/auth/me?userId=${data.user.id}`);
       const account: Account = await response.json();
 
       dispatch(setUser(data.user));

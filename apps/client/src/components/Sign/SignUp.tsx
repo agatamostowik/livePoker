@@ -11,6 +11,7 @@ import {
 import { Input } from "../Input/Input";
 import * as Styled from "./styles";
 import _ from "lodash";
+import { getUrl } from "../../hooks";
 
 const isEmail = (email: string) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -18,6 +19,7 @@ const isEmail = (email: string) => {
 
 // This page is shut down for the presentation
 export const SignUp = () => {
+  const url = getUrl();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -55,7 +57,7 @@ export const SignUp = () => {
 
       if (data.user) {
         const response = await fetch(
-          `http://localhost:3001/api/auth/me?userId=${data.user.id}`
+          `${url}/api/auth/me?userId=${data.user.id}`
         );
         const account: Account = await response.json();
 

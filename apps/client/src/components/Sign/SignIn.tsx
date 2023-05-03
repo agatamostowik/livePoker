@@ -11,8 +11,10 @@ import {
 import { Input } from "../Input/Input";
 import * as Styled from "./styles";
 import _ from "lodash";
+import { getUrl } from "../../hooks";
 
 export const SignIn = () => {
+  const url = getUrl();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -46,7 +48,7 @@ export const SignIn = () => {
 
       if (data.user) {
         const response = await fetch(
-          `http://localhost:3001/api/auth/me?userId=${data.user.id}`
+          `${url}/api/auth/me?userId=${data.user.id}`
         );
         const account: Account = await response.json();
 

@@ -4,13 +4,10 @@
     "esm": true,
     "experimentalSpecifierResolution": "node"
   },
+  "exclude": ["node_modules"],
   "compilerOptions": {
-    "module": "ESNext",
-    "target": "ES2017",
-    "esModuleInterop": true,
     "moduleResolution": "node",
     "allowJs": true,
-    "skipLibCheck": true,
     "sourceMap": true,
     "outDir": "dist"
   }

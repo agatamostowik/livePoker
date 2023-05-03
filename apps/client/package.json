@@ -5,6 +5,7 @@
   "private": true,
   "author": "Agata Mostowik",
   "scripts": {
+    "start": "npx http-server ./dist",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview"
