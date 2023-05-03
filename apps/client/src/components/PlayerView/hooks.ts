@@ -12,7 +12,7 @@ export const useWebRTC = () => {
       host:
         !process.env.NODE_ENV || process.env.NODE_ENV === "development"
           ? "localhost"
-          : "wss://livepokerbe-production.up.railway.app",
+          : "livepokerbe-production.up.railway.app",
       port: 9000,
       path: "/peerjs",
       // config: {
