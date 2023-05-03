@@ -8,6 +8,7 @@ export const antePayTable: Record<string, number> = {
   "Three of a Kind": 1,
   "Two Pair": 1,
   Pair: 1,
+  "A High": 1,
 };
 
 export const AAPayTable: Record<string, number> = {
@@ -20,4 +21,5 @@ export const AAPayTable: Record<string, number> = {
   "Three of a Kind": 7,
   "Two Pair": 7,
   Pair: 1,
+  "A High": 1,
 };

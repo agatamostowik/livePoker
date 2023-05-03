@@ -6,9 +6,11 @@ export const findGameByRoomIdController = async (
   req: Request,
   res: Response
 ) => {
+  const { roomId } = req.query;
+
   try {
     const { data, error } = await supabase.from("games").select("*").match({
-      room_id: req.query.roomId,
+      room_id: roomId,
       game_over: false,
     });
 

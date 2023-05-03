@@ -1,21 +1,21 @@
 import { z } from "zod";
 
-const meQuerySchema = z.object({
+export const meQuerySchema = z.object({
   userId: z.string().uuid(),
 });
 
-const getRoundParamsSchema = z.object({
+export const getRoundParamsSchema = z.object({
   roundId: z.string().uuid(),
 });
 
-const getRoomParamsSchema = z.object({
+export const getRoomParamsSchema = z.object({
   roomId: z.string().uuid(),
 });
 
-const findRoundByGameIdQuerySchema = z.object({
+export const findRoundByGameIdQuerySchema = z.object({
   gameId: z.string().uuid(),
 });
 
-const findGameByRoomIdQuerySchema = z.object({
+export const findGameByRoomIdQuerySchema = z.object({
   roomId: z.string().uuid(),
 });

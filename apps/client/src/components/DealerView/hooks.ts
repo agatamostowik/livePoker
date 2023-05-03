@@ -32,7 +32,10 @@ export const useWebRTC = () => {
 
   useEffect(() => {
     const peer = new Peer("dealer", {
-      host: "localhost",
+      host:
+        !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+          ? "localhost"
+          : "wss://livepokerbe-production.up.railway.app",
       port: 9000,
       path: "/peerjs",
     });

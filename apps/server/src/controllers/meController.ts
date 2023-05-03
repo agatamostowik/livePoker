@@ -3,11 +3,13 @@ import { supabase } from "../db";
 import _ from "lodash";
 
 export const meController = async (req: Request, res: Response) => {
+  const { userId } = req.query;
+
   try {
     const { data, error } = await supabase
       .from("accounts")
       .select("*")
-      .eq("user_id", req.query.userId);
+      .eq("user_id", userId);
 
     if (error) {
       res.status(400).json({ status: "error", error: error });

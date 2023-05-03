@@ -3,11 +3,12 @@ import _ from "lodash";
 import { supabase } from "../db";
 
 export const getRoundController = async (req: Request, res: Response) => {
+  const { roundId } = req.params;
   try {
     const { data, error } = await supabase
       .from("rounds")
       .select("*")
-      .eq("id", req.params.roundId);
+      .eq("id", roundId);
 
     if (error) {
       res.status(400).json({ status: "error", error: error });
