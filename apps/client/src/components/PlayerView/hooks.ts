@@ -15,6 +15,7 @@ export const useWebRTC = () => {
           : "livepokerbe-production.up.railway.app",
       port: 9000,
       path: "/peerjs",
+      secure: true,
       config: {
         iceServers: [
           { url: "stun:stun.l.google.com:19302" },
