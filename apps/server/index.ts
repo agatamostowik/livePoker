@@ -1,6 +1,5 @@
 import { initApp } from "./src/app";
 import { webSocket } from "./src/webSocket";
-import { PeerServer } from "peer";
 
 declare global {
   namespace Express {
@@ -29,16 +28,7 @@ const port = process.env.PORT || 3001;
 export const app = initApp();
 // Socket.IO Server
 export const io = webSocket(app);
-// WebRTC Server
-export const peerServer = PeerServer({
-  port: 9000,
-  path: "/peerjs",
-  corsOptions: {
-    origin,
-    credentials: true,
-  },
-});
 
 app.listen(port, () => {
-  console.log(`http://localhost:${port}/`);
+  console.log(`Express & WebSocket Server: http://localhost:${port}/`);
 });

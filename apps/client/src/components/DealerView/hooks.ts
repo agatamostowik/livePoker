@@ -4,6 +4,7 @@ import { useAppDispatch } from "../../redux/store";
 import { setIsPlayerConnected, setMediaStream } from "../../redux/slices/app";
 import { Peer } from "peerjs";
 import { useAppSelector } from "../../redux/store";
+import { getWebRTCUrl, isProduction } from "../../hooks";
 
 export const useMediaStream = () => {
   const dispatch = useAppDispatch();
@@ -32,26 +33,32 @@ export const useWebRTC = () => {
 
   useEffect(() => {
     const peer = new Peer("dealer", {
-      host:
-        !process.env.NODE_ENV || process.env.NODE_ENV === "development"
-          ? "localhost"
-          : "livepokerbe-production.up.railway.app",
-      port: 9000,
+      host: getWebRTCUrl,
+      port: 443,
       path: "/peerjs",
-      secure: true,
+      debug: 2,
+      secure: isProduction,
       config: {
         iceServers: [
-          { url: "stun:stun.l.google.com:19302" },
+          { url: "stun:stun1.l.google.com:19302" },
           {
-            url: "turn:192.158.29.39:3478?transport=udp",
-            credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
-            username: "28224511:1379330808",
+            url: "turn:numb.viagenie.ca",
+            credential: "muazkh",
+            username: "webrtc@live.com",
           },
         ],
       },
+      // config: {
+      //   iceServers: [
+      //     { url: "stun:stun.l.google.com:19302" },
+      //     {
+      //       url: "turn:192.158.29.39:3478?transport=udp",
+      //       credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+      //       username: "28224511:1379330808",
+      //     },
+      //   ],
+      // },
     });
-
-    console.log(peer);
 
     peer.on("open", () => {
       peer.call("player", mediaStream);

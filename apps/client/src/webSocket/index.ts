@@ -14,15 +14,9 @@ import { setGame, setGameOver } from "../redux/slices/game";
 import { appendRoom } from "../redux/slices/rooms";
 import { setAccount } from "../redux/slices/auth";
 import { Message } from "./types";
+import { getUrl } from "../hooks";
 
-const url =
-  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
-    ? "ws://localhost:3001"
-    : "wss://livepokerbe-production.up.railway.app";
-
-console.log("ENV: ", process.env.NODE_ENV);
-
-export const webSocketClient = io(url);
+export const webSocketClient = io(getUrl({ webSocket: true }));
 
 webSocketClient.on("HANDSHAKE", () => {
   store.dispatch(setIsWebSocketConnected(true));

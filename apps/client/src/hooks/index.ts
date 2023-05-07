@@ -14,12 +14,32 @@ import {
 } from "../redux/slices/auth";
 import { supabase } from "../db";
 
-export const getUrl = () => {
-  if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
-    return "http://localhost:3001";
-  } else {
-    return "https://livepokerbe-production.up.railway.app";
-  }
+export const isProduction = import.meta.env.PROD;
+export const isDevelopment = import.meta.env.DEV;
+
+export const getWebRTCUrl = isDevelopment
+  ? "localhost"
+  : "peer-server-production-2d43.up.railway.app";
+
+export const domain = isDevelopment
+  ? "localhost"
+  : "livepokerbe-production.up.railway.app";
+
+export const getUrl = (
+  config: { webSocket: boolean } = { webSocket: false }
+) => {
+  const { webSocket } = config;
+  const prefix = webSocket
+    ? isDevelopment
+      ? "ws"
+      : "wss"
+    : isDevelopment
+    ? "http"
+    : "https";
+
+  const port = isDevelopment ? ":3001" : "";
+
+  return `${prefix}://${domain}${port}`;
 };
 
 export const useGetInitalDataOnMount = () => {

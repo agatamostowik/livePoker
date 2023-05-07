@@ -1,31 +1,40 @@
+import _ from "lodash";
 import { useEffect } from "react";
 import { Peer } from "peerjs";
-import _ from "lodash";
 import { useAppDispatch } from "../../redux/store";
 import { setMediaStream } from "../../redux/slices/app";
+import { getWebRTCUrl, isProduction } from "../../hooks";
 
 export const useWebRTC = () => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     const peer = new Peer("player", {
-      host:
-        !process.env.NODE_ENV || process.env.NODE_ENV === "development"
-          ? "localhost"
-          : "livepokerbe-production.up.railway.app",
-      port: 9000,
+      host: getWebRTCUrl,
+      port: 443,
       path: "/peerjs",
-      secure: true,
+      debug: 2,
+      secure: isProduction,
       config: {
         iceServers: [
-          { url: "stun:stun.l.google.com:19302" },
+          { url: "stun:stun1.l.google.com:19302" },
           {
-            url: "turn:192.158.29.39:3478?transport=udp",
-            credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
-            username: "28224511:1379330808",
+            url: "turn:numb.viagenie.ca",
+            credential: "muazkh",
+            username: "webrtc@live.com",
           },
         ],
       },
+      // config: {
+      //   iceServers: [
+      //     { url: "stun:stun.l.google.com:19302" },
+      //     {
+      //       url: "turn:192.158.29.39:3478?transport=udp",
+      //       credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+      //       username: "28224511:1379330808",
+      //     },
+      //   ],
+      // },
     });
 
     console.log(peer);
