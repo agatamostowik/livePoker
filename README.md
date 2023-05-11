@@ -4,6 +4,10 @@
 
 Casino Hold'em is a thrilling version of five-card Poker where player compete against the house. The objective is to surpass the dealer's hand by forming the strongest possible five-card hand using the two cards dealt to the player and the five community cards.
 
+See a short demo on YouTube:
+
+[![YouTube demo](https://img.youtube.com/vi/zySDPhSpRvg/1.jpg)](https://www.youtube.com/watch?v=zySDPhSpRvg)
+
 ### How to use it?
 
 The application can be used from two perspectives (depending on the user's role - dealer or player).
